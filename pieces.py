@@ -1,5 +1,4 @@
-from skimage import data, filter, color
-from skimage.transform import hough_ellipse
+from skimage import filter, color
 from PIL import Image
 from scipy import ndimage
 from numpy import array, median, unique
@@ -43,8 +42,9 @@ def process_folder(dirname):
 if __name__ == '__main__':
 	args = sys.argv
 	if len(args) == 1:
-		print "Usage: python %s <filename> [gaussian filter sigma (256/40)]"
+		print "Usage: python %s <filename> [gaussian filter sigma (256/40)]" % args[0]
 		print
+		sys.exit()
 	filename = args[1]
 	if len(args) > 2:
 		sigma = float(args[2])
