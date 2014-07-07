@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
 import csv
+from glob import glob
+import os
 
 # Image processing functions
 
@@ -77,7 +79,7 @@ def process_image(image_id):
 	fig.savefig(images_name)
 	print "Saved images to %s" % images_name
 
-	row = {
+	stats = {
 		'id': image_id,
 		'image.area': total_area,
 		'seed.area': seed_area,
@@ -85,18 +87,30 @@ def process_image(image_id):
 		'eliosom.area': (image_tre == eliosom_color).sum(),
 		'uncovered.area': (image_tre == uncover_color).sum()
 	}
-	foutname = image_id + '.csv'
+	return stats
+
+def process_folder():
+	files = glob("*.jpg")
+	foutname = 'stats.csv'
 	fout = open(foutname, 'w')
-	wr = csv.DictWriter(fout, row.keys())
-	wr.writeheader()
-	wr.writerow(row)
+	wr = None
+	for fn in files:
+		image_id = fn[:fn.index(".jpg")]
+		stats = process_image(image_id)
+		if wr == None:
+			wr = csv.DictWriter(fout, stats.keys())
+			wr.writeheader()
+		wr.writerow(stats)
 	fout.close()
 	print "Saved statistics to %s" % foutname
 
 if __name__ == '__main__':
 	import sys
 	if len(sys.argv) != 2:
-		print "Please provide a filename without the extensions (abc rather than abc.jpg)"
+		print "Please provide a folder name"
 	else:
-		image_id = sys.argv[1]
-		process_image(image_id)
+		foldername = sys.argv[1]
+		os.chdir(foldername)
+		process_folder()
+		os.chdir("..")
+	
