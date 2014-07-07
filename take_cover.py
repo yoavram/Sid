@@ -4,6 +4,9 @@ from skimage.draw import ellipse_perimeter
 import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
+import csv
+
+# Image processing functions
 
 def to_gray(image_rgb):
 	return 255-color.rgb2gray(image_rgb)*255
@@ -27,7 +30,9 @@ def image_histogram(image_gray):
 	ax.set_ylabel("count")	
 	return fig,ax,counts,breaks
 
+# threshold for the trenary segmentation
 th1,th2,th3 = 15, 110, 180
+# colors for the trenary segmentations
 bg_color,cover_color,eliosom_color,uncover_color = 0,80,170,255
 def trenary_segmentation(image_gray):
 	image_tre = image_gray.copy()
@@ -45,6 +50,7 @@ def add_image(image, ax=None, cmap="Greys"):
     ax.set_yticks([])   
     return ax
 
+# main function to process a single image
 def process_image(image_id):
 	image = Image.open(image_id + ".jpg")
 	w,h = image.size
@@ -67,20 +73,30 @@ def process_image(image_id):
 	image_tre = trenary_segmentation(image_gray)
 	add_image(image_tre, ax[4])
 
-	fig.savefig(image_id + ".png")
-	print "Saved images to %s" % image_id + ".png"
+	images_name = image_id + ".png"
+	fig.savefig(images_name)
+	print "Saved images to %s" % images_name
 
-	print "image: %s" % image_id
-	print "image area: %d" % total_area
-	print "seed area: %d" % seed_area
-	print "%% cover: %.3f" % ((image_tre == cover_color).sum() / seed_area)
-	print "%% eliosom: %.3f" % ((image_tre == eliosom_color).sum() / seed_area)
-	print "%% uncovered: %.3f" % ((image_tre == uncover_color).sum() / seed_area)
+	row = {
+		'id': image_id,
+		'image.area': total_area,
+		'seed.area': seed_area,
+		'cover.area': (image_tre == cover_color).sum(),
+		'eliosom.area': (image_tre == eliosom_color).sum(),
+		'uncovered.area': (image_tre == uncover_color).sum()
+	}
+	foutname = image_id + '.csv'
+	fout = open(foutname, 'w')
+	wr = csv.DictWriter(fout, row.keys())
+	wr.writeheader()
+	wr.writerow(row)
+	fout.close()
+	print "Saved statistics to %s" % foutname
 
-import sys
-if len(sys.argv) != 2:
-	print "Please provide a filename without the extensions (abc rather than abc.jpg)"
-else:
-	image_id = sys.argv[1]	
-	process_image(image_id)
-
+if __name__ == '__main__':
+	import sys
+	if len(sys.argv) != 2:
+		print "Please provide a filename without the extensions (abc rather than abc.jpg)"
+	else:
+		image_id = sys.argv[1]
+		process_image(image_id)
