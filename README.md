@@ -3,6 +3,8 @@
 
 This repo contains experimental Python scripts for processing of pictures of plant seeds.
 
+See the [notebook](http://nbviewer.ipython.org/github/yoavram/Sid/blob/master/IP%20lab.ipynb) for a walkthrough.
+
 ### Requirements
 
 - *Python 2.7*
