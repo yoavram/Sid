@@ -1,8 +1,11 @@
-from skimage import data, filter, color
+from matplotlib.pyplot import *
+from numpy import *
+
+from skimage import data, filter, color, measure
 from skimage.transform import hough_ellipse
 from skimage.draw import ellipse_perimeter
-import matplotlib.pyplot as plt
-import numpy as np
+from skimage.morphology import dilation, erosion, square
+from scipy.ndimage import filters, label
 from PIL import Image
 import csv
 from glob import glob
@@ -19,18 +22,79 @@ def to_bw(image_gray):
 	image_bw[image_gray>1] = 255
 	return image_bw
 
+def rgb2yuv(input): # modified from https://gist.github.com/bombless/4286560
+    R, G, B = input[:,:,0],input[:,:,1],input[:,:,2]
+    Y = array(0.299 * R + 0.587 * G + 0.114 * B, dtype=input.dtype)
+    U = array(-0.147 * R + -0.289 * G + 0.436 * B, dtype=input.dtype)
+    V = array(0.615 * R + -0.515 * G + -0.100 * B, dtype=input.dtype)
+    output = input.copy()
+    output[:,:,0],output[:,:,1],output[:,:,2] = Y,U,V
+    return output
+color.rgb2yuv = rgb2yuv
 
 def otsu_segmentation(image_gray):
 	otsu_thresh = filter.threshold_otsu(image_gray)
 	return image_gray >= otsu_thresh
 
 def image_histogram(image_gray):
-	fig, ax = plt.subplots(1, 1)
-	counts,breaks = np.histogram(image_gray)
+	fig, ax = subplots(1, 1)
+	counts,breaks = histogram(image_gray)
 	ax.bar(breaks[:-1], counts, width=20, color="k")
 	ax.set_xlabel("greyscale")
 	ax.set_ylabel("count")	
 	return fig,ax,counts,breaks
+
+def plot_image(im, ax=None, cmap="Greys", title=None):
+    if ax == None:
+        fig, ax = subplots(1,1)
+    ax.imshow(im, cmap=cmap)
+    ax.set_xticks([])
+    ax.set_yticks([])
+    if title:
+        ax.set_title(title)
+    return ax
+
+def all_color_spaces(img):
+	hsv = color.rgb2hsv(img)
+	xyz = color.rgb2xyz(img)
+	yuv = color.rgb2yuv(img) # ycbcr
+	lab = color.rgb2lab(img)
+	hed = color.rgb2hed(img)
+	cie = color.rgb2rgbcie(img)
+	gray = color.rgb2gray(img)
+	return {"rgb":img, "hsv":hsv,"xyz":xyz,"yuv":yuv,"lab":lab,"hed":hed,"cie":cie,"gray":gray}
+
+def plot_color_spaces(color_spaces, cmap="Greys"):	
+	fig, ax = subplots(1, len(color_spaces), figsize=(20,8))
+	for i,(k,v) in enumerate(sorted(color_spaces.items())):
+		ax[i].imshow(v, cmap=cmap)
+		ax[i].set_xticks([])
+		ax[i].set_yticks([])
+		ax[i].set_title(k)
+	fig.tight_layout()
+	return fig,ax
+
+def triplot_image(img, title=''):
+	fig, ax = subplots(1, 3, figsize=(10,8))
+	for i,v in enumerate(['R ','G ','B ']):
+		ax[i].imshow(img[:,:,i], cmap="Greys")
+		ax[i].set_xticks([])
+		ax[i].set_yticks([])
+		ax[i].set_title(v + title)
+	fig.tight_layout()
+	return fig,ax
+
+def smooth(img):
+    if len(img.shape) == 2:
+        return filters.convolve(img, ones((10,10))/100, mode='mirror')
+    elif len(img.shape) == 3:
+        R, G, B = img[:,:,0],img[:,:,1],img[:,:,2]
+        R, G, B = smooth(R), smooth(G), smooth(B)
+        output = img.copy()
+        output[:,:,0],output[:,:,1],output[:,:,2] = R, G, B
+        return output       
+    else:
+        raise NotImplementedError()
 
 # threshold for the trenary segmentation
 th1,th2,th3 = 15, 110, 180
@@ -52,41 +116,88 @@ def add_image(image, ax=None, cmap="Greys"):
     ax.set_yticks([])   
     return ax
 
+def plot_hist(image, ax, title=""):
+	ax.hist(image.flatten(), normed=True)
+	ax.set_title(title + " histogram")
+	return ax
+
+
 # main function to process a single image
 def process_image(image_id):
+	print "Starting", image_id
 	image = Image.open(image_id + ".jpg")
 	w,h = image.size
-	fig, ax = plt.subplots(1, 5, figsize=(20,4), sharex=True, sharey=True)
-	image_rgb = np.array(image)
-	add_image(image_rgb, ax[0])
 
-	image_gray = to_gray(image_rgb)
-	add_image(image_gray, ax[1])
-	image_bw = to_bw(image_gray)
-	add_image(image_bw, ax[2])
+	image_rgb = array(image)
+	color_spaces = all_color_spaces(image_rgb)
+	fig,ax = plot_color_spaces(color_spaces)
+	fig.savefig(image_id  + "_colorspaces.jpg")
+	
+	fig,ax = subplots(4, 4, figsize=(10,8))
+	plot_image(image_rgb, ax=ax[0,0], title="original")
 
-	total_area = float(w*h)
-	seed_area = float((image_bw==255).sum())
+# bg
+	plot_image(color_spaces["xyz"], ax=ax[0,1], title="xyz")
+	bg = color_spaces['xyz'] == [0.95, 1., 1.089]
+	bg = color.rgb2gray(bg)
+	bg = bg > 0
+	plot_image(bg, ax=ax[0,2], title="bg rough")
+	bg = dilation(bg, square(10))
+	bg = bg > 0
+	plot_image(bg, ax=ax[0,3], title="bg dilation")
 
-	image_otsu = otsu_segmentation(image_gray)
-	add_image(image_otsu, ax[3])
-	fig_hist,ax_hist,counts,breaks = image_histogram(image_gray)
-	fig_hist.savefig(image_id + "_histogram.png")
-	image_tre = trenary_segmentation(image_gray)
-	add_image(image_tre, ax[4])
+# cover
+	plot_image(color_spaces["yuv"][:,:,2], ax=ax[1,0], title="yuv B")
+	yuv_smooth_B = smooth(color_spaces["yuv"])[:,:,2]
+	plot_image(yuv_smooth_B, ax=ax[1,1], title="yuv smooth B")
+	plot_hist(yuv_smooth_B, ax[1,2], "yuv smooth B")
 
-	images_name = image_id + ".png"
-	fig.savefig(images_name)
-	print "Saved images to %s" % images_name
+	cover_mask = yuv_smooth_B > 110
+	img_cover = image_rgb.copy()
+	img_cover[cover_mask] = (0,255,0)
+	plot_image(img_cover, ax[1,3], title="cover")
 
-	stats = {
-		'id': image_id,
-		'image.area': total_area,
-		'seed.area': seed_area,
-		'cover.area': (image_tre == cover_color).sum(),
-		'eliosom.area': (image_tre == eliosom_color).sum(),
-		'uncovered.area': (image_tre == uncover_color).sum()
-	}
+# eliosom
+	plot_image(color_spaces['lab'][:,:,2], ax=ax[2,0], title="lab B")
+	lab_smooth_B = smooth(color_spaces["lab"])[:,:,2]
+	plot_image(lab_smooth_B, ax=ax[2,1], title="lab smooth B")
+	plot_hist(lab_smooth_B, ax[2,2], "lab smooth B")
+	eliosom_mask = lab_smooth_B > 25
+	img_eliosom = image_rgb.copy()
+	img_eliosom[eliosom_mask] = (255,0,0)
+	plot_image(eliosom_mask, ax[2,3], title="eliosom")
+
+# final 
+	output_img = image_rgb.copy()
+	output_img[:,:] = (0,0,0)
+	output_img[cover_mask] = (0,255,0)
+	output_img[eliosom_mask] = (255,0,0)
+	output_img[bg>0] = (0,0,255)
+	
+	plot_image(image_rgb, ax[3,2], title="original")
+	ax[3,0].axis('off')
+	ax[3,1].axis('off')
+	plot_image(output_img, ax[3,3], title="final")
+	
+
+	fig.tight_layout()
+	fig.savefig(image_id + "_color_segmentation.jpg")
+
+# stats
+	stats = {}
+	stats["total_area"] =   h*w - sum(output_img[:,:,2] > 0)
+	stats["cover_area"] =   sum(output_img[:,:,1] > 0)
+	stats["eliosom_area"] = sum(output_img[:,:,0] > 0)
+
+	label_im, nb_labels = label(output_img[:,:,2]==0)
+	regions = measure.regionprops(label_im)#, properties=['Area', 'Perimeter'])
+	props = regions[0]
+	stats["major_axis_length"] = props.major_axis_length
+	stats["minor_axis_length"] = props.minor_axis_length
+	stats["area"] = props.area
+	stats["perimeter"] = props.perimeter
+	stats["orientation"] = props.orientation
+
 	return stats
 
 def process_folder():
