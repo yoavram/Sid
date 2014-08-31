@@ -197,7 +197,8 @@ def process_image(image_id):
 	stats["area"] = props.area
 	stats["perimeter"] = props.perimeter
 	stats["orientation"] = props.orientation
-
+	stats["id"] = image_id
+	
 	return stats
 
 def process_folder():
