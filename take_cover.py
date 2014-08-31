@@ -7,6 +7,7 @@ from skimage.draw import ellipse_perimeter
 from skimage.morphology import dilation, erosion, square
 from scipy.ndimage import filters, label
 from PIL import Image
+import pandas as pd
 import csv
 from glob import glob
 import os
@@ -204,16 +205,12 @@ def process_image(image_id):
 def process_folder():
 	files = glob("*.jpg")
 	foutname = 'stats.csv'
-	fout = open(foutname, 'w')
-	wr = None
+	stats = []
 	for fn in files:
-		image_id = fn[:fn.index(".jpg")]
-		stats = process_image(image_id)
-		if wr == None:
-			wr = csv.DictWriter(fout, stats.keys())
-			wr.writeheader()
-		wr.writerow(stats)
-	fout.close()
+	 	image_id = fn[:fn.index(".jpg")]
+	 	stats.append( process_image(image_id) )
+	df = pd.DataFrame(stats)
+	df.to_csv(foutname, index=False)
 	print "Saved statistics to %s" % foutname
 
 if __name__ == '__main__':
