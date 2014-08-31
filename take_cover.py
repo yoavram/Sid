@@ -131,7 +131,7 @@ def process_image(image_id):
 	image_rgb = array(image)
 	color_spaces = all_color_spaces(image_rgb)
 	fig,ax = plot_color_spaces(color_spaces)
-	fig.savefig(image_id  + "_colorspaces.jpg")
+	fig.savefig(image_id  + "_colorspaces.png")
 	
 	fig,ax = subplots(4, 4, figsize=(10,8))
 	plot_image(image_rgb, ax=ax[0,0], title="original")
@@ -181,7 +181,7 @@ def process_image(image_id):
 	
 
 	fig.tight_layout()
-	fig.savefig(image_id + "_color_segmentation.jpg")
+	fig.savefig(image_id + "_color_segmentation.png")
 
 # stats
 	stats = {}
