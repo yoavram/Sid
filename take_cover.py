@@ -7,7 +7,6 @@ from skimage.draw import ellipse_perimeter
 from skimage.morphology import dilation, erosion, square
 from scipy.ndimage import filters, label
 from PIL import Image
-import pandas as pd
 import csv
 from glob import glob
 import os
@@ -132,7 +131,7 @@ def process_image(image_id):
 	image_rgb = array(image)
 	color_spaces = all_color_spaces(image_rgb)
 	fig,ax = plot_color_spaces(color_spaces)
-	fig.savefig(image_id  + "_colorspaces.png")
+	fig.savefig(image_id  + "_colorspaces.jpg")
 	
 	fig,ax = subplots(4, 4, figsize=(10,8))
 	plot_image(image_rgb, ax=ax[0,0], title="original")
@@ -182,7 +181,7 @@ def process_image(image_id):
 	
 
 	fig.tight_layout()
-	fig.savefig(image_id + "_color_segmentation.png")
+	fig.savefig(image_id + "_color_segmentation.jpg")
 
 # stats
 	stats = {}
@@ -198,19 +197,22 @@ def process_image(image_id):
 	stats["area"] = props.area
 	stats["perimeter"] = props.perimeter
 	stats["orientation"] = props.orientation
-	stats["id"] = image_id
-	
+
 	return stats
 
 def process_folder():
 	files = glob("*.jpg")
 	foutname = 'stats.csv'
-	stats = []
+	fout = open(foutname, 'w')
+	wr = None
 	for fn in files:
-	 	image_id = fn[:fn.index(".jpg")]
-	 	stats.append( process_image(image_id) )
-	df = pd.DataFrame(stats)
-	df.to_csv(foutname, index=False)
+		image_id = fn[:fn.index(".jpg")]
+		stats = process_image(image_id)
+		if wr == None:
+			wr = csv.DictWriter(fout, stats.keys())
+			wr.writeheader()
+		wr.writerow(stats)
+	fout.close()
 	print "Saved statistics to %s" % foutname
 
 if __name__ == '__main__':
