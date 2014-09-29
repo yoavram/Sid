@@ -216,12 +216,13 @@ def process_folder():
 	print "Saved statistics to %s" % foutname
 
 if __name__ == '__main__':
-	import sys
-	if len(sys.argv) != 2:
-		print "Please provide a folder name"
+	foldername = raw_input("Please provide a folder name\n")
+	if not os.path.exists(foldername):
+		print "Folder", foldername, "doesn't exist"
+		raw_input("Click enter to finish...")
 	else:
-		foldername = sys.argv[1]
 		os.chdir(foldername)
 		process_folder()
 		os.chdir("..")
+		raw_input("Click enter to finish...")
 	
