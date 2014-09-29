@@ -184,7 +184,7 @@ def process_image(image_id):
 	fig.savefig(image_id + "_color_segmentation.jpg")
 
 # stats
-	stats = {}
+	stats = {'image_id': image_id}
 	stats["total_area"] =   h*w - sum(output_img[:,:,2] > 0)
 	stats["cover_area"] =   sum(output_img[:,:,1] > 0)
 	stats["eliosom_area"] = sum(output_img[:,:,0] > 0)
