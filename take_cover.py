@@ -137,14 +137,11 @@ def process_image(image_id):
 	plot_image(image_rgb, ax=ax[0,0], title="original")
 
 # bg
-	plot_image(color_spaces["xyz"], ax=ax[0,1], title="xyz")
-	bg = color_spaces['xyz'] == [0.95, 1., 1.089]
-	bg = color.rgb2gray(bg)
-	bg = bg > 0
-	plot_image(bg, ax=ax[0,2], title="bg rough")
-	bg = dilation(bg, square(10))
-	bg = bg > 0
-	plot_image(bg, ax=ax[0,3], title="bg dilation")
+	plot_image(color_spaces["gray"], ax=ax[0,1], title="gray")
+	bg = smooth(color_spaces["gray"])
+        plot_image(bg, ax=ax[0,2], title="gray smooth")
+        bg = bg > 0.9
+        plot_image(bg, ax=ax[0,3], title="bg")
 
 # cover
 	plot_image(color_spaces["yuv"][:,:,2], ax=ax[1,0], title="yuv B")
