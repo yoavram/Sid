@@ -131,7 +131,7 @@ def process_image(image_id):
 	image_rgb = array(image)
 	color_spaces = all_color_spaces(image_rgb)
 	fig,ax = plot_color_spaces(color_spaces)
-	fig.savefig(image_id  + "_colorspaces.jpg")
+	fig.savefig(image_id  + "_colorspaces.png")
 	
 	fig,ax = subplots(4, 4, figsize=(10,8))
 	plot_image(image_rgb, ax=ax[0,0], title="original")
@@ -181,10 +181,10 @@ def process_image(image_id):
 	
 
 	fig.tight_layout()
-	fig.savefig(image_id + "_color_segmentation.jpg")
+	fig.savefig(image_id + "_color_segmentation.png")
 
 # stats
-	stats = {}
+	stats = {'image_id': image_id}
 	stats["total_area"] =   h*w - sum(output_img[:,:,2] > 0)
 	stats["cover_area"] =   sum(output_img[:,:,1] > 0)
 	stats["eliosom_area"] = sum(output_img[:,:,0] > 0)
@@ -215,13 +215,63 @@ def process_folder():
 	fout.close()
 	print "Saved statistics to %s" % foutname
 
+
+def watch_folder(path):	
+	from watchdog.events import FileSystemEventHandler
+	from watchdog.observers import Observer
+	from watchdog.events import FileCreatedEvent#, LoggingEventHandler
+	#import logging
+	import time
+	class EventHandler(FileSystemEventHandler):
+		def on_created(self, event):
+			if not isinstance(event,  FileCreatedEvent):
+				return
+			fn = event.src_path
+			if not fn.endswith(".jpg"):
+				return
+			print "Processing new file", fn
+			image_id = fn[:fn.index(".jpg")]
+			stats = process_image(image_id)
+			print "Proccesed file", fn
+			print "See folder for utility images"
+			print "############################"
+			print "Stats:"
+			for k,v in sorted(stats.items()):
+				print k,":",v
+			print "############################"
+			print "Waiting for new images..."
+	#logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+	event_handler = EventHandler()#LoggingEventHandler()
+	observer = Observer()
+	observer.schedule(event_handler, path, recursive=False)
+	print "Watching folder", path
+	observer.start()
+	try:
+		while True:
+			time.sleep(1)
+	except KeyboardInterrupt:
+		observer.stop()
+	observer.join()
+	return
+	image_id = fn[:fn.index(".jpg")]
+	stats = process_image(image_id)
+	
+	
+	
+
+
 if __name__ == '__main__':
-	import sys
-	if len(sys.argv) != 2:
-		print "Please provide a folder name"
+	foldername = raw_input("Please provide a folder name\n")
+	if not os.path.exists(foldername):
+		print "Folder", foldername, "doesn't exist"
+		raw_input("Click enter to finish...")
 	else:
-		foldername = sys.argv[1]
-		os.chdir(foldername)
-		process_folder()
-		os.chdir("..")
+		use_watchdog = raw_input("Watch folder? (y - run continously; n - run once)").lower() == 'y'		
+		if use_watchdog:
+			watch_folder(foldername)
+		else:
+			os.chdir(foldername)
+			process_folder()
+			os.chdir("..")
+		raw_input("Click enter to finish...")
 	
