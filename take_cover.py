@@ -5,11 +5,19 @@ from skimage import data, filter, color, measure
 from skimage.transform import hough_ellipse
 from skimage.draw import ellipse_perimeter
 from skimage.morphology import dilation, erosion, square
-from scipy.ndimage import filters, label
+from scipy.ndimage import filters, label, binary_opening
 from PIL import Image
 import csv
 from glob import glob
 import os
+import json
+
+try:
+        with open("take_cover.json") as f:
+                params = json.load(f)
+except Exception as e:
+        print "Falied reading parameters file"
+        raise e
 
 # Image processing functions
 
@@ -96,18 +104,6 @@ def smooth(img):
     else:
         raise NotImplementedError()
 
-# threshold for the trenary segmentation
-th1,th2,th3 = 15, 110, 180
-# colors for the trenary segmentations
-bg_color,cover_color,eliosom_color,uncover_color = 0,80,170,255
-def trenary_segmentation(image_gray):
-	image_tre = image_gray.copy()
-	image_tre[image_gray <= th1] = bg_color
-	image_tre[(image_gray <= th2) & (image_gray > th1)] = cover_color
-	image_tre[(image_gray <= th3) & (image_gray > th2)] = eliosom_color
-	image_tre[image_gray > th3] = uncover_color
-	return image_tre
-
 def add_image(image, ax=None, cmap="Greys"):	
     if ax == None:
         fig, ax = subplots(1,1)
@@ -117,7 +113,7 @@ def add_image(image, ax=None, cmap="Greys"):
     return ax
 
 def plot_hist(image, ax, title=""):
-	ax.hist(image.flatten(), normed=True)
+	ax.hist(image.flatten(), normed=True, bins=20, color='w')
 	ax.set_title(title + " histogram")
 	return ax
 
@@ -137,34 +133,51 @@ def process_image(image_id):
 	plot_image(image_rgb, ax=ax[0,0], title="original")
 
 # bg
-	plot_image(color_spaces["gray"], ax=ax[0,1], title="gray")
-	bg = smooth(color_spaces["gray"])
-        plot_image(bg, ax=ax[0,2], title="gray smooth")
-        bg = bg > 0.9
-        plot_image(bg, ax=ax[0,3], title="bg")
-
-# cover
-	plot_image(color_spaces["yuv"][:,:,2], ax=ax[1,0], title="yuv B")
-	yuv_smooth_B = smooth(color_spaces["yuv"])[:,:,2]
-	plot_image(yuv_smooth_B, ax=ax[1,1], title="yuv smooth B")
-	plot_hist(yuv_smooth_B, ax[1,2], "yuv smooth B")
-
-	cover_mask = yuv_smooth_B > 110
-	img_cover = image_rgb.copy()
-	img_cover[cover_mask] = (0,255,0)
-	plot_image(img_cover, ax[1,3], title="cover")
+        #print "bg"
+	gray = color_spaces["gray"]
+	plot_image(gray, ax=ax[0,0], title="gray")
+	otsu_th = filter.threshold_otsu(gray)
+	mean_th = gray.mean()
+	th = otsu_th if otsu_th > params["min_otsu_th"] else mean_th
+        bg = gray > th
+        plot_image(bg, ax=ax[0,1], title="mask th=%.4f" % th)
+	axis = plot_hist(gray[gray<1], ax[0,2], "gray")
+        axis.axvline(x=mean_th, color='b', label="mean")
+        axis.axvline(x=otsu_th, color='r', label="otsu")
+        axis.legend(loc="upper left")
+        bg = binary_opening(bg, square(params["binary_opening_size"]), params["binary_opening_iters"])
+        bg = dilation(bg, square(params["dilation_size"]))
+        bg = bg > 0
+        fg = ~bg
+        plot_image(bg, ax=ax[0,3], title="bg - bin open & dilation")
 
 # eliosom
-	plot_image(color_spaces['lab'][:,:,2], ax=ax[2,0], title="lab B")
+        #print "eliosom"
+	plot_image(color_spaces['lab'][:,:,2], ax=ax[1,0], title="lab B")
 	lab_smooth_B = smooth(color_spaces["lab"])[:,:,2]
-	plot_image(lab_smooth_B, ax=ax[2,1], title="lab smooth B")
-	plot_hist(lab_smooth_B, ax[2,2], "lab smooth B")
-	eliosom_mask = lab_smooth_B > 25
+	plot_image(lab_smooth_B, ax=ax[1,1], title="lab smooth B")
+	axis = plot_hist(lab_smooth_B, ax[1,2], "lab smooth B")
+        axis.axvline(x=params["eliosom_th"], color='r')
+	eliosom_mask = lab_smooth_B > params["eliosom_th"]
 	img_eliosom = image_rgb.copy()
 	img_eliosom[eliosom_mask] = (255,0,0)
-	plot_image(eliosom_mask, ax[2,3], title="eliosom")
+	plot_image(eliosom_mask, ax[1,3], title="eliosom")
+	
+# cover
+        #print "cover"
+	plot_image(color_spaces["yuv"][:,:,2], ax=ax[2,0], title="yuv B")
+	yuv_smooth_B = smooth(color_spaces["yuv"])[:,:,2]
+	plot_image(yuv_smooth_B, ax=ax[2,1], title="yuv smooth B")
+	axis = plot_hist(yuv_smooth_B, ax[2,2], "yuv smooth B")
+        axis.axvline(x=params["cover_th"], color='r')
+	cover_mask = yuv_smooth_B > params["cover_th"]
+	cover_mask = (cover_mask & fg) & ~eliosom_mask
+	img_cover = image_rgb.copy()
+	img_cover[cover_mask] = (0,255,0)
+	plot_image(img_cover, ax[2,3], title="cover")
 
-# final 
+# final
+        #print "final"
 	output_img = image_rgb.copy()
 	output_img[:,:] = (0,0,0)
 	output_img[cover_mask] = (0,255,0)
