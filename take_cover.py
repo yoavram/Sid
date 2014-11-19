@@ -151,6 +151,12 @@ def process_image(image_id):
         fg = ~bg
         plot_image(bg, ax=ax[0,3], title="bg - bin open & dilation")
 
+# labels
+        label_im, nb_labels = label(bg==0)
+	regions = measure.regionprops(label_im)#, properties=['Area', 'Perimeter'])
+	props = regions[0]
+	centroid_x, centroid_y = props['centroid']
+	
 # eliosom
         #print "eliosom"
 	plot_image(color_spaces['lab'][:,:,2], ax=ax[1,0], title="lab B")
@@ -159,6 +165,7 @@ def process_image(image_id):
 	axis = plot_hist(lab_smooth_B, ax[1,2], "lab smooth B")
         axis.axvline(x=params["eliosom_th"], color='r')
 	eliosom_mask = lab_smooth_B > params["eliosom_th"]
+	eliosom_mask[:,:centroid_y] = False
 	img_eliosom = image_rgb.copy()
 	img_eliosom[eliosom_mask] = (255,0,0)
 	plot_image(eliosom_mask, ax[1,3], title="eliosom")
@@ -198,10 +205,6 @@ def process_image(image_id):
 	stats["total_area"] =   h*w - sum(output_img[:,:,2] > 0)
 	stats["cover_area"] =   sum(output_img[:,:,1] > 0)
 	stats["eliosom_area"] = sum(output_img[:,:,0] > 0)
-
-	label_im, nb_labels = label(output_img[:,:,2]==0)
-	regions = measure.regionprops(label_im)#, properties=['Area', 'Perimeter'])
-	props = regions[0]
 	stats["major_axis_length"] = props.major_axis_length
 	stats["minor_axis_length"] = props.minor_axis_length
 	stats["area"] = props.area
@@ -239,7 +242,7 @@ def watch_folder(path):
 		def on_created(self, event):
 			if not isinstance(event,  FileCreatedEvent):
 				return
-			fn = event.src_path
+			fn = event.src_path.lower()
 			if not fn.endswith(".jpg"):
 				return
 			print "Processing new file", fn
