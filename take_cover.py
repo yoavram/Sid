@@ -165,10 +165,11 @@ def process_image(image_id):
 	axis = plot_hist(lab_smooth_B, ax[1,2], "lab smooth B")
         axis.axvline(x=params["eliosom_th"], color='r')
 	eliosom_mask = lab_smooth_B > params["eliosom_th"]
+	eliosom_mask = eliosom_mask & fg
 	eliosom_mask[:,:centroid_y] = False
 	img_eliosom = image_rgb.copy()
 	img_eliosom[eliosom_mask] = (255,0,0)
-	plot_image(eliosom_mask, ax[1,3], title="eliosom")
+	plot_image(img_eliosom, ax[1,3], title="eliosom")
 	
 # cover
         #print "cover"
