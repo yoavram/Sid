@@ -230,6 +230,9 @@ def watch_folder(path):
 	from watchdog.events import FileSystemEventHandler
 	from watchdog.observers import Observer
 	from watchdog.events import FileCreatedEvent#, LoggingEventHandler
+	from subprocess import Popen
+	DETACHED_PROCESS = 0x00000008
+	
 	#import logging
 	import time
 	class EventHandler(FileSystemEventHandler):
@@ -249,6 +252,11 @@ def watch_folder(path):
 			for k,v in sorted(stats.items()):
 				print k,":",v
 			print "############################"
+			cmd = [
+				"C:\Program Files\IrfanView\i_view32.exe",
+				image_id + '_color_segmentation.png'
+			]
+			Popen(cmd,shell=False,stdin=None,stdout=None,stderr=None,close_fds=True,creationflags=DETACHED_PROCESS)
 			print "Waiting for new images..."
 	#logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 	event_handler = EventHandler()#LoggingEventHandler()
