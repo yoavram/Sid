@@ -5,7 +5,7 @@ from skimage import data, filter, color, measure
 from skimage.transform import hough_ellipse
 from skimage.draw import ellipse_perimeter
 from skimage.morphology import dilation, erosion, square
-from scipy.ndimage import filters, label, binary_opening
+from scipy.ndimage import filters, label, binary_opening, find_objects
 from PIL import Image
 import csv
 from glob import glob
@@ -184,6 +184,15 @@ def process_image(image_id):
 	img_cover[cover_mask] = (0,255,0)
 	plot_image(img_cover, ax[2,3], title="cover")
 
+# measure square
+        image_yellow = image_rgb[:,:,2] > 200
+        plot_image(image_yellow, ax[3,0], title="yellow mask")
+        image_yellow = binary_opening(image_yellow, square(1), 10)
+        labels_yellow,n_yellow = label(~image_yellow)
+        regions_yellow = measure.regionprops(labels_yellow)
+        regions_yellow.sort(key=lambda x: x.area, reverse=True)
+        plot_image(labels_yellow, ax[3,1], title="yellow ref")
+        
 # final
         #print "final"
 	output_img = image_rgb.copy()
@@ -211,6 +220,9 @@ def process_image(image_id):
 	stats["area"] = props.area
 	stats["perimeter"] = props.perimeter
 	stats["orientation"] = props.orientation
+	stats["ref_area"] = regions_yellow[1].area
+	stats["ref_major_axis_length"] = regions_yellow[1].major_axis_length
+	stats["ref_minor_axis_length"] = regions_yellow[1].minor_axis_length
 
 	return stats
 
