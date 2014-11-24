@@ -1,9 +1,8 @@
 # Sid
 ## Image processing scripts for seed pictures
-
-This repo contains Python scripts for processing of photos of plant seeds, specifically _Lamium amplexicaule_.
-
 ![https://raw.githubusercontent.com/yoavram/Sid/master/Sid.png](https://raw.githubusercontent.com/yoavram/Sid/master/Sid.png)
+
+Python scripts for image processing of photos of plant seeds, specifically _Lamium amplexicaule_.
 
 ## Requirements
 
