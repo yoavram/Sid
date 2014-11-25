@@ -105,16 +105,20 @@ def smooth(img):
         raise NotImplementedError()
 
 def add_image(image, ax=None, cmap="Greys"):	
-    if ax == None:
-        fig, ax = subplots(1,1)
-    ax.imshow(image, cmap=cmap)
-    ax.set_xticks([])
-    ax.set_yticks([])   
-    return ax
+        if ax == None:
+                fig, ax = subplots(1,1)
+        ax.imshow(image, cmap=cmap)
+        ax.set_xticks([])
+        ax.set_yticks([])   
+        return ax
 
-def plot_hist(image, ax, title=""):
+def plot_hist(image, ax, th=None, title=""):
 	ax.hist(image.flatten(), normed=True, bins=20, color='w')
-	ax.set_title(title + " histogram")
+        if th:
+                ax.axvline(x=th, color='r')
+                ax.set_title("%s histogram\nth=%.2f" % (title, th))
+	else:
+                ax.set_title("%s histogram" % title)
 	return ax
 
 
@@ -141,9 +145,9 @@ def process_image(image_id):
 	th = otsu_th if otsu_th > params["min_otsu_th"] else mean_th
         bg = gray > th
         plot_image(bg, ax=ax[0,1], title="mask th=%.4f" % th)
-	axis = plot_hist(gray[gray<1], ax[0,2], "gray")
+	axis = plot_hist(gray[gray<1], ax[0,2], th=th, title="gray")
         axis.axvline(x=mean_th, color='b', label="mean")
-        axis.axvline(x=otsu_th, color='r', label="otsu")
+        axis.axvline(x=otsu_th, color='g', label="otsu")
         axis.legend(loc="upper left")
         bg = binary_opening(bg, square(params["binary_opening_size"]), params["binary_opening_iters"])
         bg = dilation(bg, square(params["dilation_size"]))
@@ -162,27 +166,30 @@ def process_image(image_id):
 	plot_image(color_spaces['lab'][:,:,2], ax=ax[1,0], title="lab B")
 	lab_smooth_B = smooth(color_spaces["lab"])[:,:,2]
 	plot_image(lab_smooth_B, ax=ax[1,1], title="lab smooth B")
-	axis = plot_hist(lab_smooth_B, ax[1,2], "lab smooth B")
-        axis.axvline(x=params["eliosom_th"], color='r')
-	eliosom_mask = lab_smooth_B > params["eliosom_th"]
+	th = params["eliosom_th"]
+        th = filter.threshold_yen(lab_smooth_B) * 1.2
+	axis = plot_hist(lab_smooth_B, ax[1,2], th=th, title="lab smooth B")
+	eliosom_mask = lab_smooth_B > th
 	eliosom_mask = eliosom_mask & fg
 	eliosom_mask[:,:centroid_y] = False
 	img_eliosom = image_rgb.copy()
 	img_eliosom[eliosom_mask] = (255,0,0)
 	plot_image(img_eliosom, ax[1,3], title="eliosom")
-	
+
+
 # cover
         #print "cover"
-	plot_image(color_spaces["yuv"][:,:,2], ax=ax[2,0], title="yuv B")
-	yuv_smooth_B = smooth(color_spaces["yuv"])[:,:,2]
-	plot_image(yuv_smooth_B, ax=ax[2,1], title="yuv smooth B")
-	axis = plot_hist(yuv_smooth_B, ax[2,2], "yuv smooth B")
-        axis.axvline(x=params["cover_th"], color='r')
-	cover_mask = yuv_smooth_B > params["cover_th"]
+        gray = color_spaces["gray"]
+	plot_image(gray, ax=ax[2,0], title="gray")
+	gray_smooth = smooth(color_spaces["gray"])      
+	th = gray[fg>0].mean()
+        axis = plot_hist(gray, ax[2,2], th=th, title="gray")
+	cover_mask = gray > th	
 	cover_mask = (cover_mask & fg) & ~eliosom_mask
 	img_cover = image_rgb.copy()
 	img_cover[cover_mask] = (0,255,0)
 	plot_image(img_cover, ax[2,3], title="cover")
+
 
 # measure square
         image_yellow = image_rgb[:,:,2] > 200
@@ -295,17 +302,20 @@ def watch_folder(path):
 
 
 if __name__ == '__main__':
-	foldername = raw_input("Please provide a folder name\n")
-	if not os.path.exists(foldername):
-		print "Folder", foldername, "doesn't exist"
-		raw_input("Click enter to finish...")
-	else:
-		use_watchdog = raw_input("Watch folder? (y - run continously; n - run once)").lower() == 'y'		
-		if use_watchdog:
-			watch_folder(foldername)
-		else:
-			os.chdir(foldername)
-			process_folder()
-			os.chdir("..")
-		raw_input("Click enter to finish...")
+        try:
+                foldername = raw_input("Please provide a folder name\n")
+                if not os.path.exists(foldername):
+                        print "Folder", foldername, "doesn't exist"
+                        raw_input("Click enter to finish...")
+                else:
+                        use_watchdog = raw_input("Watch folder? (y - run continously; n - run once)").lower() == 'y'		
+                        if use_watchdog:
+                                watch_folder(foldername)
+                        else:
+                                os.chdir(foldername)
+                                process_folder()
+                                os.chdir("..")
+        except Exception as e:
+                print e
+	raw_input("Click enter to finish...")
 	
