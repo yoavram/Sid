@@ -219,6 +219,7 @@ def process_image(image_id):
 
 	fig.tight_layout()
 	fig.savefig(image_id + "_color_segmentation.png")
+        fig.close()
         
 # stats
 	stats = {'image_id': image_id}
