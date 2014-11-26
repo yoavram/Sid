@@ -150,9 +150,12 @@ def process_image(image_id):
         axis.axvline(x=otsu_th, color='g', label="otsu")
         axis.legend(loc="upper left")
         bg = binary_opening(bg, square(params["binary_opening_size"]), params["binary_opening_iters"])
+        bg_for_cover =  dilation(bg, square(15))
         bg = dilation(bg, square(params["dilation_size"]))
         bg = bg > 0
+        bg_for_cover = bg_for_cover > 0
         fg = ~bg
+        fg_for_cover = ~bg_for_cover
         plot_image(bg, ax=ax[0,3], title="bg - bin open & dilation")
 
 # labels
@@ -182,10 +185,10 @@ def process_image(image_id):
         gray = color_spaces["gray"]
 	plot_image(gray, ax=ax[2,0], title="gray")
 	gray_smooth = smooth(color_spaces["gray"])      
-	th = gray[fg>0].mean()
+	th = (gray[fg>0].mean())*1.1
         axis = plot_hist(gray, ax[2,2], th=th, title="gray")
 	cover_mask = gray > th	
-	cover_mask = (cover_mask & fg) & ~eliosom_mask
+	cover_mask = (cover_mask & fg_for_cover) & ~eliosom_mask
 	img_cover = image_rgb.copy()
 	img_cover[cover_mask] = (0,255,0)
 	plot_image(img_cover, ax[2,3], title="cover")
@@ -206,7 +209,7 @@ def process_image(image_id):
 	output_img[:,:] = (0,0,0)
 	output_img[cover_mask] = (0,255,0)
 	output_img[eliosom_mask] = (255,0,0)
-	output_img[bg>0] = (0,0,255)
+	output_img[bg > 0] = (0,0,255)
 	
 	plot_image(image_rgb, ax[3,2], title="original")
 	ax[3,0].axis('off')
@@ -216,7 +219,7 @@ def process_image(image_id):
 
 	fig.tight_layout()
 	fig.savefig(image_id + "_color_segmentation.png")
-
+        
 # stats
 	stats = {'image_id': image_id}
 	stats["total_area"] =   h*w - sum(output_img[:,:,2] > 0)
