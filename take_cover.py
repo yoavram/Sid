@@ -231,7 +231,7 @@ def process_image(image_id):
 
 	fig.tight_layout()
 	fig.savefig(image_id + "_color_segmentation.png")
-        #close(fig)
+        clf()
         
 # stats
 	stats = {'image_id': image_id}
@@ -323,14 +323,12 @@ def watch_folder(path):
 
 if __name__ == '__main__':
         try:
-                #JOPA
-                foldername = 'D:\My Documents\My Desktop\Eyal\Test2'#raw_input("Please provide a folder name\n")
+                foldername = raw_input("Please provide a folder name\n")
                 if not os.path.exists(foldername):
                         print "Folder", foldername, "doesn't exist"
                         raw_input("Click enter to finish...")
                 else:
-                        #JOPA
-                        use_watchdog = False#raw_input("Watch folder? (y - run continously; n - run once)").lower() == 'y'		
+                        use_watchdog = raw_input("Watch folder? (y - run continously; n - run once)").lower() == 'y'		
                         if use_watchdog:
                                 watch_folder(foldername)
                         else:
@@ -338,6 +336,6 @@ if __name__ == '__main__':
                                 process_folder()
                                 os.chdir("..")
         except Exception as e:
-                print e #JOPA
+                print e
 	raw_input("Click enter to finish...")
 	
