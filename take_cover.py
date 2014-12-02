@@ -114,6 +114,8 @@ def add_image(image, ax=None, cmap="Greys"):
 
 def plot_hist(image, ax, th=None, title=""):
 	ax.hist(image.flatten(), normed=True, bins=20, color='w')
+	ax.set_xticks(ax.get_xticks()[::2])
+	ax.set_yticks(ax.get_yticks()[::2])
         if th:
                 ax.axvline(x=th, color='r')
                 ax.set_title("%s histogram\nth=%.2f" % (title, th))
@@ -146,10 +148,11 @@ def process_image(image_id):
         bg = gray > th
         plot_image(bg, ax=ax[0,1], title="mask th=%.4f" % th)
 	axis = plot_hist(gray[gray<1], ax[0,2], th=th, title="gray")
-        axis.axvline(x=mean_th, color='b', label="mean")
-        axis.axvline(x=otsu_th, color='g', label="otsu")
-        axis.legend(loc="upper left")
+        axis.axvline(x=mean_th, color='b', ls='--', label="mean")
+        axis.axvline(x=otsu_th, color='g', ls='--', label="otsu")
+        axis.legend(loc="upper left", fontsize=10)
         bg = binary_opening(bg, square(params["binary_opening_size"]), params["binary_opening_iters"])
+        bg_no_dilation = bg.copy()
         bg_for_cover =  dilation(bg, square(15))
         bg = dilation(bg, square(params["dilation_size"]))
         bg = bg > 0
@@ -179,12 +182,16 @@ def process_image(image_id):
 	img_eliosom[eliosom_mask] = (255,0,0)
 	plot_image(img_eliosom, ax[1,3], title="eliosom")
 
+# labels without eliosom
+        label_im, nb_labels = label((bg|eliosom_mask)==0) 
+	regions = measure.regionprops(label_im)#, properties=['Area', 'Perimeter'])
+	props2 = regions[0]
+	centroid_x, centroid_y = props['centroid']
 
 # cover
         #print "cover"
         gray = color_spaces["gray"]
 	plot_image(gray, ax=ax[2,0], title="gray")
-	gray_smooth = smooth(color_spaces["gray"])      
 	th = (gray[fg>0].mean())*1.1
         axis = plot_hist(gray, ax[2,2], th=th, title="gray")
 	cover_mask = gray > th	
@@ -192,12 +199,17 @@ def process_image(image_id):
 	img_cover = image_rgb.copy()
 	img_cover[cover_mask] = (0,255,0)
 	plot_image(img_cover, ax[2,3], title="cover")
-
-
+        ax[2,1].set_xticks([])
+        ax[2,1].set_yticks([])
+        ax[2,1].text(0.1,0.5,"This plot left blank")
+        
 # measure square
         image_yellow = image_rgb[:,:,2] > 200
         plot_image(image_yellow, ax[3,0], title="yellow mask")
         image_yellow = binary_opening(image_yellow, square(1), 10)
+        image_yellow = image_yellow ^ bg_no_dilation
+        image_yellow = erosion(image_yellow, square(3))
+        #plot_image(image_yellow, ax[3,1], title="yellow xor bg")
         labels_yellow,n_yellow = label(~image_yellow)
         regions_yellow = measure.regionprops(labels_yellow)
         regions_yellow.sort(key=lambda x: x.area, reverse=True)
@@ -219,28 +231,32 @@ def process_image(image_id):
 
 	fig.tight_layout()
 	fig.savefig(image_id + "_color_segmentation.png")
-        fig.close()
+        #close(fig)
         
 # stats
 	stats = {'image_id': image_id}
-	stats["total_area"] =   h*w - sum(output_img[:,:,2] > 0)
+	stats["blue_area"] =   h*w - sum(output_img[:,:,2] > 0)
 	stats["cover_area"] =   sum(output_img[:,:,1] > 0)
 	stats["eliosom_area"] = sum(output_img[:,:,0] > 0)
-	stats["major_axis_length"] = props.major_axis_length
-	stats["minor_axis_length"] = props.minor_axis_length
+	stats["length"] = props.major_axis_length
+	stats["width"] = props.minor_axis_length
 	stats["area"] = props.area
 	stats["perimeter"] = props.perimeter
+	stats["seed_length"] = props2.major_axis_length
+	stats["seed_width"] = props2.minor_axis_length
+	stats["seed_area"] = props2.area
+	stats["seed_perimeter"] = props2.perimeter
 	stats["orientation"] = props.orientation
-	stats["ref_area"] = regions_yellow[1].area
-	stats["ref_major_axis_length"] = regions_yellow[1].major_axis_length
-	stats["ref_minor_axis_length"] = regions_yellow[1].minor_axis_length
+	stats["ref_area"] = regions_yellow[0].area
+	stats["ref_major_axis_length"] = regions_yellow[0].major_axis_length
+	stats["ref_minor_axis_length"] = regions_yellow[0].minor_axis_length
 
 	return stats
 
 def process_folder():
 	files = glob("*.jpg")
 	foutname = 'stats.csv'
-	fout = open(foutname, 'w')
+	fout = open(foutname, 'wb')
 	wr = None
 	for fn in files:
 		image_id = fn[:fn.index(".jpg")]
@@ -307,12 +323,14 @@ def watch_folder(path):
 
 if __name__ == '__main__':
         try:
-                foldername = raw_input("Please provide a folder name\n")
+                #JOPA
+                foldername = 'D:\My Documents\My Desktop\Eyal\Test2'#raw_input("Please provide a folder name\n")
                 if not os.path.exists(foldername):
                         print "Folder", foldername, "doesn't exist"
                         raw_input("Click enter to finish...")
                 else:
-                        use_watchdog = raw_input("Watch folder? (y - run continously; n - run once)").lower() == 'y'		
+                        #JOPA
+                        use_watchdog = False#raw_input("Watch folder? (y - run continously; n - run once)").lower() == 'y'		
                         if use_watchdog:
                                 watch_folder(foldername)
                         else:
@@ -320,6 +338,6 @@ if __name__ == '__main__':
                                 process_folder()
                                 os.chdir("..")
         except Exception as e:
-                print e
+                print e #JOPA
 	raw_input("Click enter to finish...")
 	
