@@ -1,11 +1,9 @@
 from matplotlib.pyplot import *
 from numpy import *
 
-from skimage import data, filter, color, measure
-from skimage.transform import hough_ellipse
-from skimage.draw import ellipse_perimeter
+from skimage import filter, color, measure
 from skimage.morphology import dilation, erosion, square
-from scipy.ndimage import filters, label, binary_opening, find_objects
+from scipy.ndimage import filters, label, binary_opening
 from PIL import Image
 import csv
 from glob import glob
@@ -296,10 +294,14 @@ def watch_folder(path):
 				print k,":",v
 			print "############################"
 			cmd = [
-				"C:\Program Files\IrfanView\i_view32.exe",
+				params.get("irfanview_path", "C:\Program Files\IrfanView\i_view32.exe"),
 				image_id + '_color_segmentation.png'
 			]
-			Popen(cmd,shell=False,stdin=None,stdout=None,stderr=None,close_fds=True,creationflags=DETACHED_PROCESS)
+			try:
+				Popen(cmd,shell=False,stdin=None,stdout=None,stderr=None,close_fds=True,creationflags=DETACHED_PROCESS)
+			except WindowsError as e:
+				print "Please make sure IrfanView is installed and the full path to the exe file is given in the json parameters file."
+				raise e
 			print "Waiting for new images..."
 	#logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 	event_handler = EventHandler()#LoggingEventHandler()
