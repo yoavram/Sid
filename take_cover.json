@@ -1,9 +1,9 @@
 {
     "min_otsu_th": 0.75,
-    "eliosom_th": 25,
     "cover_th": 0.45,
     "binary_opening_size": 2,
     "binary_opening_iters": 10,
+    "eliosom_th_factor": 1.2,
     "dilation_size": 10,
     "irfanview_path": "C:\\Program Files (x86)\\IrfanView\\i_view32.exe",
     "autoview: false # change to true to open images automatically

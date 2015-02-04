@@ -170,8 +170,7 @@ def process_image(image_id):
     plot_image(color_spaces['lab'][:,:,2], ax=ax[1,0], title="lab B")
     lab_smooth_B = smooth(color_spaces["lab"])[:,:,2]
     plot_image(lab_smooth_B, ax=ax[1,1], title="lab smooth B")
-    th = params["eliosom_th"]
-        th = filter.threshold_yen(lab_smooth_B) * 1.2
+    th = filter.threshold_yen(lab_smooth_B) * 1.2
     axis = plot_hist(lab_smooth_B, ax[1,2], th=th, title="lab smooth B")
     eliosom_mask = lab_smooth_B > th
     eliosom_mask = eliosom_mask & fg
