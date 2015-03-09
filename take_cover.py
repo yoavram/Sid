@@ -11,11 +11,11 @@ import os
 import json
 
 try:
-        with open("take_cover.json") as f:
-                params = json.load(f)
+    with open("take_cover.json") as f:
+        params = json.load(f)
 except Exception as e:
-        print "Falied reading parameters file"
-        raise e
+    print "Falied reading parameters file"
+    raise e
 
 # Image processing functions
 
@@ -114,11 +114,11 @@ def plot_hist(image, ax, th=None, title=""):
     ax.hist(image.flatten(), normed=True, bins=20, color='w')
     ax.set_xticks(ax.get_xticks()[::2])
     ax.set_yticks(ax.get_yticks()[::2])
-        if th:
-                ax.axvline(x=th, color='r')
-                ax.set_title("%s histogram\nth=%.2f" % (title, th))
+    if th:
+        ax.axvline(x=th, color='r')
+        ax.set_title("%s histogram\nth=%.2f" % (title, th))
     else:
-                ax.set_title("%s histogram" % title)
+        ax.set_title("%s histogram" % title)
     return ax
 
 
@@ -143,24 +143,24 @@ def process_image(image_id):
     otsu_th = filter.threshold_otsu(gray)
     mean_th = gray.mean()
     th = otsu_th if otsu_th > params["min_otsu_th"] else mean_th
-        bg = gray > th
-        plot_image(bg, ax=ax[0,1], title="mask th=%.4f" % th)
+    bg = gray > th
+    plot_image(bg, ax=ax[0,1], title="mask th=%.4f" % th)
     axis = plot_hist(gray[gray<1], ax[0,2], th=th, title="gray")
-        axis.axvline(x=mean_th, color='b', ls='--', label="mean")
-        axis.axvline(x=otsu_th, color='g', ls='--', label="otsu")
-        axis.legend(loc="upper left", fontsize=10)
-        bg = binary_opening(bg, square(params["binary_opening_size"]), params["binary_opening_iters"])
-        bg_no_dilation = bg.copy()
-        bg_for_cover =  dilation(bg, square(15))
-        bg = dilation(bg, square(params["dilation_size"]))
-        bg = bg > 0
-        bg_for_cover = bg_for_cover > 0
-        fg = ~bg
-        fg_for_cover = ~bg_for_cover
-        plot_image(bg, ax=ax[0,3], title="bg - bin open & dilation")
+    axis.axvline(x=mean_th, color='b', ls='--', label="mean")
+    axis.axvline(x=otsu_th, color='g', ls='--', label="otsu")
+    axis.legend(loc="upper left", fontsize=10)
+    bg = binary_opening(bg, square(params["binary_opening_size"]), params["binary_opening_iters"])
+    bg_no_dilation = bg.copy()
+    bg_for_cover =  dilation(bg, square(15))
+    bg = dilation(bg, square(params["dilation_size"]))
+    bg = bg > 0
+    bg_for_cover = bg_for_cover > 0
+    fg = ~bg
+    fg_for_cover = ~bg_for_cover
+    plot_image(bg, ax=ax[0,3], title="bg - bin open & dilation")
 
 # labels
-        label_im, nb_labels = label(bg==0)
+    label_im, nb_labels = label(bg==0)
     regions = measure.regionprops(label_im)#, properties=['Area', 'Perimeter'])
     props = regions[0]
     centroid_x, centroid_y = props['centroid']
@@ -170,7 +170,7 @@ def process_image(image_id):
     plot_image(color_spaces['lab'][:,:,2], ax=ax[1,0], title="lab B")
     lab_smooth_B = smooth(color_spaces["lab"])[:,:,2]
     plot_image(lab_smooth_B, ax=ax[1,1], title="lab smooth B")
-    th = filter.threshold_yen(lab_smooth_B) * 1.2
+    th = filter.threshold_yen(lab_smooth_B) * params["eliosom_th_factor"]
     axis = plot_hist(lab_smooth_B, ax[1,2], th=th, title="lab smooth B")
     eliosom_mask = lab_smooth_B > th
     eliosom_mask = eliosom_mask & fg
@@ -180,40 +180,40 @@ def process_image(image_id):
     plot_image(img_eliosom, ax[1,3], title="eliosom")
 
 # labels without eliosom
-        label_im, nb_labels = label((bg|eliosom_mask)==0) 
+    label_im, nb_labels = label((bg|eliosom_mask)==0) 
     regions = measure.regionprops(label_im)#, properties=['Area', 'Perimeter'])
     props2 = regions[0]
     centroid_x, centroid_y = props['centroid']
 
 # cover
-        #print "cover"
-        gray = color_spaces["gray"]
+    #print "cover"
+    gray = color_spaces["gray"]
     plot_image(gray, ax=ax[2,0], title="gray")
     th = (gray[fg>0].mean())*1.1
-        axis = plot_hist(gray, ax[2,2], th=th, title="gray")
+    axis = plot_hist(gray, ax[2,2], th=th, title="gray")
     cover_mask = gray > th    
     cover_mask = (cover_mask & fg_for_cover) & ~eliosom_mask
     img_cover = image_rgb.copy()
     img_cover[cover_mask] = (0,255,0)
     plot_image(img_cover, ax[2,3], title="cover")
-        ax[2,1].set_xticks([])
-        ax[2,1].set_yticks([])
-        ax[2,1].text(0.1,0.5,"This plot left blank")
-        
+    ax[2,1].set_xticks([])
+    ax[2,1].set_yticks([])
+    ax[2,1].text(0.1,0.5,"This plot left blank")
+
 # measure square
-        image_yellow = image_rgb[:,:,2] > 200
-        plot_image(image_yellow, ax[3,0], title="yellow mask")
-        image_yellow = binary_opening(image_yellow, square(1), 10)
-        image_yellow = image_yellow ^ bg_no_dilation
-        image_yellow = erosion(image_yellow, square(3))
-        #plot_image(image_yellow, ax[3,1], title="yellow xor bg")
-        labels_yellow,n_yellow = label(~image_yellow)
-        regions_yellow = measure.regionprops(labels_yellow)
-        regions_yellow.sort(key=lambda x: x.area, reverse=True)
-        plot_image(labels_yellow, ax[3,1], title="yellow ref")
+    image_yellow = image_rgb[:,:,2] > 200
+    plot_image(image_yellow, ax[3,0], title="yellow mask")
+    image_yellow = binary_opening(image_yellow, square(1), 10)
+    image_yellow = image_yellow ^ bg_no_dilation
+    image_yellow = erosion(image_yellow, square(3))
+    #plot_image(image_yellow, ax[3,1], title="yellow xor bg")
+    labels_yellow,n_yellow = label(~image_yellow)
+    regions_yellow = measure.regionprops(labels_yellow)
+    regions_yellow.sort(key=lambda x: x.area, reverse=True)
+    plot_image(labels_yellow, ax[3,1], title="yellow ref")
         
-# final
-        #print "final"
+    # final
+    #print "final"
     output_img = image_rgb.copy()
     output_img[:,:] = (0,0,0)
     output_img[cover_mask] = (0,255,0)
@@ -228,7 +228,7 @@ def process_image(image_id):
 
     fig.tight_layout()
     fig.savefig(image_id + "_color_segmentation.png")
-        clf()
+    clf()
         
 # stats
     stats = {'image_id': image_id}
@@ -292,16 +292,16 @@ def watch_folder(path):
             for k,v in sorted(stats.items()):
                 print k,":",v
             print "############################"
-                 if params.get("autoview", False):
-                    cmd = [
-                        params.get("irfanview_path", "C:\Program Files\IrfanView\i_view32.exe"),
-                        image_id + '_color_segmentation.png'
-                    ]
-                    try:
-                        Popen(cmd,shell=False,stdin=None,stdout=None,stderr=None,close_fds=True,creationflags=DETACHED_PROCESS)
-                    except WindowsError as e:
-                        print "Please make sure IrfanView is installed and the full path to the exe file is given in the json parameters file."
-                        raise e
+            if params.get("autoview", False):
+                cmd = [
+                    params.get("irfanview_path", "C:\Program Files\IrfanView\i_view32.exe"),
+                    image_id + '_color_segmentation.png'
+                ]
+                try:
+                    Popen(cmd,shell=False,stdin=None,stdout=None,stderr=None,close_fds=True,creationflags=DETACHED_PROCESS)
+                except WindowsError as e:
+                    print "Please make sure IrfanView is installed and the full path to the exe file is given in the json parameters file."
+                    raise e
             print "Waiting for new images..."
     #logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
     event_handler = EventHandler()#LoggingEventHandler()
@@ -316,13 +316,10 @@ def watch_folder(path):
         observer.stop()
     observer.join()
     return
-    image_id = fn[:fn.index(".jpg")]
-    stats = process_image(image_id)
+    #image_id = fn[:fn.index(".jpg")]
+    #stats = process_image(image_id)
     
     
-    
-
-
 if __name__ == '__main__':
     try:
         foldername = raw_input("Please provide a folder name\n")

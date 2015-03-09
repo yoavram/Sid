@@ -6,5 +6,5 @@
     "eliosom_th_factor": 1.2,
     "dilation_size": 10,
     "irfanview_path": "C:\\Program Files (x86)\\IrfanView\\i_view32.exe",
-    "autoview: false # change to true to open images automatically
+    "autoview": false 
 }
