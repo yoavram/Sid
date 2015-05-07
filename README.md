@@ -18,7 +18,7 @@ Python can be downloaded from [python.org](http://www.python.org/download/releas
 
 Windows installers for *numpy*, *scipy*, *PILLOW* (*PIL* stand-in) and *scikit-image* can be downloaded from [Gohlke's website](http://www.lfd.uci.edu/~gohlke/pythonlibs/).
 
-Another option for windows is to use [Enthought python distribution (EPD)](https://www.enthought.com/products/epd/) for which [free academic licenses](https://www.enthought.com/products/canopy/academic/) are available.
+Another option for windows is to use the [Anaconda python distribution](https://store.continuum.io/cshop/anaconda/) (free).
 
 Sid can then be downloaded by cloning the repository:
 ```
@@ -46,7 +46,7 @@ In this case the script will wait for new _jpg_ files in the folder. When a new 
 
 ## Single processing
 
-In this case the script will go over all _jpg_ files in the folder and process them. It will produce _png_ files with the color spaces and the segmentation checkpoints and a _csv_ file with the final stats for each _jpg_ file.
+In this case the script will go over all _jpg_ files in the folder and process them. It will produce _png_ files with the color spaces and the segmentation checkpoints and two _csv_ files: one with the final stats for each _jpg_ file and one with the histograms that were used to find the features on the seed (background, eliosom, cover). 
 
 ### take_cover.json
 
