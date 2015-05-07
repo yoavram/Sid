@@ -328,13 +328,15 @@ if __name__ == '__main__':
             raw_input("Click enter to finish...")
         else:
             while True:
-                use_watchdog = raw_input("Watch folder? (y - run continously; n - run once)").lower() == 'y'        
-                if use_watchdog:
+                action = raw_input("Watch folder? (y - run continously; n - run once; q - quit) ").lower()                                
+                if action == 'y':
                     watch_folder(foldername)
-                else:
+                elif action == 'n':
                     os.chdir(foldername)
                     process_folder()
                     os.chdir("..")
+                else:
+                    break
     except Exception as e:
             print e
     raw_input("Click enter to finish...")
