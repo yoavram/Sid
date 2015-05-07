@@ -111,7 +111,7 @@ def add_image(image, ax=None, cmap="Greys"):
         return ax
 
 def plot_hist(image, ax, th=None, title=""):
-    ax.hist(image.flatten(), normed=True, bins=20, color='w')
+    counts, bins, patches = ax.hist(image.flatten(), normed=True, bins=20, color='w')
     ax.set_xticks(ax.get_xticks()[::2])
     ax.set_yticks(ax.get_yticks()[::2])
     if th:
@@ -119,7 +119,7 @@ def plot_hist(image, ax, th=None, title=""):
         ax.set_title("%s histogram\nth=%.2f" % (title, th))
     else:
         ax.set_title("%s histogram" % title)
-    return ax
+    return ax, dict(zip(bins, counts))
 
 
 # main function to process a single image
@@ -137,7 +137,6 @@ def process_image(image_id):
     plot_image(image_rgb, ax=ax[0,0], title="original")
 
 # bg
-        #print "bg"
     gray = color_spaces["gray"]
     plot_image(gray, ax=ax[0,0], title="gray")
     otsu_th = filter.threshold_otsu(gray)
@@ -145,7 +144,7 @@ def process_image(image_id):
     th = otsu_th if otsu_th > params["min_otsu_th"] else mean_th
     bg = gray > th
     plot_image(bg, ax=ax[0,1], title="mask th=%.4f" % th)
-    axis = plot_hist(gray[gray<1], ax[0,2], th=th, title="gray")
+    axis, bg_histogram = plot_hist(gray[gray<1], ax[0,2], th=th, title="gray")
     axis.axvline(x=mean_th, color='b', ls='--', label="mean")
     axis.axvline(x=otsu_th, color='g', ls='--', label="otsu")
     axis.legend(loc="upper left", fontsize=10)
@@ -166,12 +165,11 @@ def process_image(image_id):
     centroid_x, centroid_y = props['centroid']
     
 # eliosom
-        #print "eliosom"
     plot_image(color_spaces['lab'][:,:,2], ax=ax[1,0], title="lab B")
     lab_smooth_B = smooth(color_spaces["lab"])[:,:,2]
     plot_image(lab_smooth_B, ax=ax[1,1], title="lab smooth B")
     th = filter.threshold_yen(lab_smooth_B) * params["eliosom_th_factor"]
-    axis = plot_hist(lab_smooth_B, ax[1,2], th=th, title="lab smooth B")
+    axis, eliosom_histogram = plot_hist(lab_smooth_B, ax[1,2], th=th, title="lab smooth B")
     eliosom_mask = lab_smooth_B > th
     eliosom_mask = eliosom_mask & fg
     eliosom_mask[:,:centroid_y] = False
@@ -186,11 +184,10 @@ def process_image(image_id):
     centroid_x, centroid_y = props['centroid']
 
 # cover
-    #print "cover"
     gray = color_spaces["gray"]
     plot_image(gray, ax=ax[2,0], title="gray")
     th = (gray[fg>0].mean())*1.1
-    axis = plot_hist(gray, ax[2,2], th=th, title="gray")
+    axis, cover_histogram = plot_hist(gray, ax[2,2], th=th, title="gray")
     cover_mask = gray > th    
     cover_mask = (cover_mask & fg_for_cover) & ~eliosom_mask
     img_cover = image_rgb.copy()
@@ -248,22 +245,36 @@ def process_image(image_id):
     stats["ref_major_axis_length"] = regions_yellow[0].major_axis_length
     stats["ref_minor_axis_length"] = regions_yellow[0].minor_axis_length
 
-    return stats
+# histograms
+    histograms = {'bg': bg_histogram, 'eliosom': eliosom_histogram, 'cover': cover_histogram}
+
+    return stats, histograms
 
 def process_folder():
     files = glob("*.jpg")
-    foutname = 'stats.csv'
-    fout = open(foutname, 'wb')
-    wr = None
+    stats_foutname = 'stats.csv'
+    hist_foutname = 'histograms.csv'
+    stats_fout = open(stats_foutname, 'wb')
+    hist_fout = open(hist_foutname, 'wb')
+    stats_wr = None
+    hist_wr = None
     for fn in files:
         image_id = fn[:fn.index(".jpg")]
-        stats = process_image(image_id)
-        if wr == None:
-            wr = csv.DictWriter(fout, stats.keys())
-            wr.writeheader()
-        wr.writerow(stats)
-    fout.close()
-    print "Saved statistics to %s" % foutname
+        stats, histograms = process_image(image_id)
+        if stats_wr == None:
+            stats_wr = csv.DictWriter(stats_fout, stats.keys())
+            stats_wr.writeheader()
+        if hist_wr == None:
+            hist_wr = csv.writer(hist_fout)
+            hist_wr.writerow(['image_id', 'mask', 'bin', 'count'])            
+        stats_wr.writerow(stats)
+        for mask,histogram in histograms.items():
+            for bin,count in histogram.items():
+                hist_wr.writerow([image_id, mask, bin, count])
+    stats_fout.close()
+    hist_fout.close()
+    print "Saved statistics to %s" % stats_foutname
+    print "Saved histograms to %s" % hist_foutname
 
 
 def watch_folder(path):    
@@ -321,7 +332,7 @@ def watch_folder(path):
     
     
 if __name__ == '__main__':
-    try:
+    # try:
         foldername = raw_input("Please provide a folder name\n")
         if not os.path.exists(foldername):
             print "Folder", foldername, "doesn't exist"
@@ -337,7 +348,7 @@ if __name__ == '__main__':
                     os.chdir("..")
                 else:
                     break
-    except Exception as e:
-            print e
-    raw_input("Click enter to finish...")
+    # except Exception as e:
+    #         print e
+        raw_input("Click enter to finish...")
     
