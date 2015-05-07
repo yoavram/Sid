@@ -295,7 +295,7 @@ def watch_folder(path):
                 return
             print "Processing new file", fn
             image_id = fn[:fn.index(".jpg")]
-            stats = process_image(image_id)
+            stats,_ = process_image(image_id)
             print "Proccesed file", fn
             print "See folder for utility images"
             print "############################"
