@@ -1,13 +1,13 @@
 # Sid
 ## Image processing scripts for seed pictures
-![https://raw.githubusercontent.com/yoavram/Sid/master/Sid.png](https://raw.githubusercontent.com/yoavram/Sid/master/Sid.png)
+<img src="https://raw.githubusercontent.com/yoavram/Sid/master/Sid.png" width="100" alt="Siddhartha">
 
 Python scripts for image processing of photos of plant seeds, specifically _Lamium amplexicaule_.
 
 ## Requirements
 
 - *Python 2.7*
-- *PIL* - Image processing library. 
+- *PIL*/*PILLOW* - Image processing library. 
 - *numpy* - The ultimate numerical python packge.
 - *scipy* - The ultimate scientific python package (the _ndimage_  is required).
 - *scikit-image* - Another image processing library
