@@ -15,6 +15,21 @@ import versioneer
 with open('README.md') as f:
     README = f.read()
 
+
+# add your dependencies here
+# remember to use 'package-name>=x.y.z,<x.y+1.0' notation (this way you get bugfixes)
+reqs = ['numpy',
+        'scipy',
+        'matplotlib',
+        'scikit-image',
+        'pillow',
+        'watchdog',
+        'click'
+        ]
+import sys
+if sys.platform == 'win32':
+    sys.append('pypiwin32')
+
 setup(
     name='Sid',
     version=versioneer.get_version(),
@@ -42,17 +57,7 @@ setup(
     data_files=[('images', ['images/0615-1.jpg', 'images/0615-2.jpg', 'images/0615-3.jpg']),
                 ('Sid', ['Sid/take_cover.json']),
     ],
-    install_requires=[
-        # add your dependencies here
-        # remember to use 'package-name>=x.y.z,<x.y+1.0' notation (this way you get bugfixes)
-        # click, numpy, scipy, pyparsing, pytz, six, python-dateutil, matplotlib, pandas, statsmodels, lxml, seaborn, sympy, xlrd, future, lmfit
-        'numpy',
-        'scipy',
-        'matplotlib',
-        'scikit-image',
-        'pillow',
-        'watchdog'
-    ],
+    install_requires=reqs,        
     extras_require={
         'tests': [
             'nose',

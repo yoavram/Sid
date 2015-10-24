@@ -38,6 +38,5 @@ dependencies:
   - pypiwin32==219
   - pyyaml==3.11
   - sphinx-rtd-theme==0.1.7
-  - versioneer==0.15
   - watchdog==0.8.3
 

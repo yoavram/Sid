@@ -28,12 +28,15 @@ before_install:
 # Install packages
 install:
   - conda install -q python=$TRAVIS_PYTHON_VERSION pip requests conda-build jinja2 anaconda-client atlas numpy scipy matplotlib scikit-image pillow coverage nose sphinx
+  - pip install watchdog click
+  - python setup.py install
 #  - conda build conda-recipe
-#  - conda install --use-local curveball
+#  - conda install --use-local Sid
 
 # Run test
-script:  
-  - nosetests tests --with-coverage --cover-package=curveball
+script:
+  - take_cover --version
+  - nosetests tests --with-coverage --cover-package=Sid
 
 after_success:
 # Code coverage
