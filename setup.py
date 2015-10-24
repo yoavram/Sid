@@ -65,7 +65,7 @@ setup(
     entry_points={
         'console_scripts': [
             # add cli scripts here in this form:
-            'sid=Sid.take_cover:main',
+            'take_cover=Sid.take_cover:main',
         ],
     },
 )

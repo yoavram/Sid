@@ -4,6 +4,7 @@ recursive-include Sid *.py
 recursive-include tests *.py
 recursive-exclude Sid *.pyc
 recursive-exclude tests *.pyc
+include images/__init__.py
 include images/0615-1.jpg
 include images/0615-2.jpg
 include images/0615-3.jpg

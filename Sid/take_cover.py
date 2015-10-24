@@ -7,25 +7,55 @@
 # Licensed under the MIT license:
 # http://www.opensource.org/licenses/MIT-license
 # Copyright (c) 2015, Yoav Ram <yoav@yoavram.com>
-from glob import glob
 import os
+from glob import glob
 import json
 import csv
-
+from subprocess import Popen
+import time
+from watchdog.events import FileSystemEventHandler
+from watchdog.observers import Observer
+from watchdog.events import FileCreatedEvent
 import matplotlib.pyplot as plt
 import numpy as np
-
 from skimage import filters, color, measure
 from skimage.morphology import dilation, erosion, square
 from scipy.ndimage import label, binary_opening
 from scipy.ndimage import filters as scipy_filters
 from PIL import Image
+import click
+import Sid
 
 
-cfg_filename = os.path.splitext(__file__)[0]+'.json'    
-with open(cfg_filename) as f:
-    params = json.load(f)
-print "Reading config from {0}".format(cfg_filename)
+ERROR_COLOR = 'red'
+INFO_COLOR = 'cyan'
+DETACHED_PROCESS = 0x00000008
+EXTENSION = ".jpg"
+CONFIG = {}
+
+echo = click.echo
+
+def echo_error(message):
+    click.secho("Error: %s" % message, fg=ERROR_COLOR)
+
+def echo_info(message):
+    click.secho(message, fg=INFO_COLOR)
+
+def ioerror_to_click_exception(io_error):
+    if io_error.message:
+        message = io_error.message
+    else:
+        message = 'Make sure that the file is not open and you have permission to write to this path.'
+    raise click.FileError(io_error.filename, hint=message)
+
+
+def where(ctx, param, value):    
+    if not value or ctx.resilient_parsing:
+        return
+    path = Sid.__file__
+    folder = os.path.split(path)[0]
+    click.secho(click.format_filename(folder))
+    ctx.exit()
 
 
 # Image processing functions
@@ -86,7 +116,7 @@ def all_color_spaces(img):
     hed = color.rgb2hed(img)
     cie = color.rgb2rgbcie(img)
     gray = color.rgb2gray(img)
-    return {"rgb":img, "hsv":hsv,"xyz":xyz,"yuv":yuv,"lab":lab,"hed":hed,"cie":cie,"gray":gray}
+    return {"rgb":img, "hsv":hsv, "xyz":xyz, "yuv":yuv, "lab":lab, "hed":hed, "cie":cie, "gray":gray}
 
 
 def plot_color_spaces(color_spaces, cmap="Greys"):    
@@ -145,10 +175,12 @@ def plot_hist(image, ax, th=None, title=""):
     return ax, dict(zip(bins, counts))
 
 
-# main function to process a single image
 def process_image(image_id):
-    print "Starting {0}".format(image_id)
-    image = Image.open("{0}.jpg".format(image_id))
+    echo_info("Starting {0}".format(image_id))
+    try:        
+        image = Image.open("{0}{1}".format(image_id, EXTENSION))
+    except IOError as e:
+        ioerror_to_click_exception(e)
     w,h = image.size
 
     image_rgb = np.array(image)
@@ -164,17 +196,17 @@ def process_image(image_id):
     plot_image(gray, ax=ax[0,0], title="gray")
     otsu_th = filters.threshold_otsu(gray)
     mean_th = gray.mean()
-    th = otsu_th if otsu_th > params["min_otsu_th"] else mean_th
+    th = otsu_th if otsu_th > CONFIG["min_otsu_th"] else mean_th
     bg = gray > th
     plot_image(bg, ax=ax[0,1], title="mask th=%.4f" % th)
     axis, bg_histogram = plot_hist(gray[gray<1], ax[0,2], th=th, title="gray")
     axis.axvline(x=mean_th, color='b', ls='--', label="mean")
     axis.axvline(x=otsu_th, color='g', ls='--', label="otsu")
     axis.legend(loc="upper left", fontsize=10)
-    bg = binary_opening(bg, square(params["binary_opening_size"]), params["binary_opening_iters"])
+    bg = binary_opening(bg, square(CONFIG["binary_opening_size"]), CONFIG["binary_opening_iters"])
     bg_no_dilation = bg.copy()
     bg_for_cover =  dilation(bg, square(15))
-    bg = dilation(bg, square(params["dilation_size"]))
+    bg = dilation(bg, square(CONFIG["dilation_size"]))
     bg = bg > 0
     bg_for_cover = bg_for_cover > 0
     fg = ~bg
@@ -191,7 +223,7 @@ def process_image(image_id):
     plot_image(color_spaces['lab'][:,:,2], ax=ax[1, 0], title="lab B")
     lab_smooth_B = smooth(color_spaces["lab"])[:, :, 2]
     plot_image(lab_smooth_B, ax=ax[1, 1], title="lab smooth B")
-    th = filters.threshold_yen(lab_smooth_B) * params["eliosom_th_factor"]
+    th = filters.threshold_yen(lab_smooth_B) * CONFIG["eliosom_th_factor"]
     axis, eliosom_histogram = plot_hist(lab_smooth_B, ax[1, 2], th=th, title="lab smooth B")
     eliosom_mask = lab_smooth_B > th
     eliosom_mask = eliosom_mask & fg
@@ -253,9 +285,9 @@ def process_image(image_id):
 # stats
     stats = {
         'image_id':     image_id,
-        "blue_area":    h*w - sum(output_img[:, :, 2] > 0),
-        "cover_area":   sum(output_img[:, :, 1] > 0),
-        "eliosom_area": sum(output_img[:, :, 0] > 0),
+        "blue_area":    h * w - np.sum(output_img[:, :, 2] > 0),
+        "cover_area":   np.sum(output_img[:, :, 1] > 0),
+        "eliosom_area": np.sum(output_img[:, :, 0] > 0),
         "length":       props.major_axis_length,
         "width":        props.minor_axis_length,
         "area":         props.area,
@@ -279,16 +311,20 @@ def process_image(image_id):
 
     return stats, histograms
 
-def process_folder():
-    files = glob("*.jpg")
-    stats_foutname = 'stats.csv'
-    hist_foutname = 'histograms.csv'
-    stats_fout = open(stats_foutname, 'wb')
-    hist_fout = open(hist_foutname, 'wb')
-    stats_wr = None
-    hist_wr = None
+
+def process_folder(path):
+    files = glob(os.path.join(path, "*" + EXTENSION))
+    stats_foutname = os.path.join(path, 'stats.csv')
+    hist_foutname = os.path.join(path, 'histograms.csv')
+    try:
+        stats_fout = click.open_file(stats_foutname, 'wb')
+        hist_fout = click.open_file(hist_foutname, 'wb')
+    except IOError as e:
+        ioerror_to_click_exception(e)
+    stats_wr, hist_wr = None, None
+
     for fn in files:
-        image_id = fn[:fn.index(".jpg")]
+        image_id = fn[:fn.index(EXTENSION)]
         stats, histograms = process_image(image_id)
         if stats_wr == None:
             stats_wr = csv.DictWriter(stats_fout, stats.keys())
@@ -300,80 +336,96 @@ def process_folder():
         for mask,histogram in histograms.items():
             for bin,count in histogram.items():
                 hist_wr.writerow([image_id, mask, bin, count])
+    
     stats_fout.close()
     hist_fout.close()
-    print "Saved statistics to {0}".format(stats_foutname)
-    print "Saved histograms to {0}".format(hist_foutname)
+    echo_info("Saved statistics to {0}".format(click.format_filename(stats_foutname)))
+    echo_info("Saved histograms to {0}".format(click.format_filename(hist_foutname)))
 
 
-def watch_folder(path):    
-    from watchdog.events import FileSystemEventHandler
-    from watchdog.observers import Observer
-    from watchdog.events import FileCreatedEvent#, LoggingEventHandler
-    from subprocess import Popen
-    import time
-    DETACHED_PROCESS = 0x00000008
-    
-    class EventHandler(FileSystemEventHandler):
-        def on_created(self, event):
-            if not isinstance(event,  FileCreatedEvent):
-                return
-            fn = event.src_path.lower()
-            if not fn.endswith(".jpg"):
-                return
-            print "Processing new file {0}".format(fn)
-            image_id = fn[:fn.index(".jpg")]
-            stats,_ = process_image(image_id)
-            print "Proccesed file {0}".format(fn)
-            print "See folder for utility images"
-            print "############################"
-            print "Stats:"
-            for k,v in sorted(stats.items()):
-                print "{0} : {1}".format(k, v)
-            print "############################"
-            if params.get("autoview", False):
-                cmd = [
-                    params.get("irfanview_path", "C:\Program Files\IrfanView\i_view32.exe"),
-                    '{0}_color_segmentation.png'.format(image_id)
-                ]
-                try:
-                    Popen(cmd, shell=False, stdin=None, stdout=None, stderr=None, close_fds=True, creationflags=DETACHED_PROCESS)
-                except WindowsError as e:
-                    print "Please make sure IrfanView is installed and the full path to the exe file is given in the json parameters file."
-                    raise e
-            print "Waiting for new images..."
+class EventHandler(FileSystemEventHandler):
+    def on_created(self, event):
+        if not isinstance(event,  FileCreatedEvent):
+            return
+        fn = event.src_path.lower()
+        if not fn.endswith(EXTENSION):
+            return
+        echo_info("Processing new file {0}".format(fn))
+        image_id = fn[:fn.index(EXTENSION)]
+        stats,_ = process_image(image_id)
+        echo_info("Proccesed file {0}".format(fn))
+        echo_info("See folder for utility images")
+        echo_info("############################")
+        echo_info("Stats:")
+        for k,v in sorted(stats.items()):
+            echo("{0}: {1}".format(k, v))
+        echo_info("############################")
+        if CONFIG.get("autoview", False):
+            cmd = [
+                CONFIG.get("irfanview_path", "C:\Program Files\IrfanView\i_view32.exe"),
+                '{0}_color_segmentation.png'.format(image_id)
+            ]
+            try:
+                Popen(cmd, shell=False, stdin=None, stdout=None, stderr=None, close_fds=True, creationflags=DETACHED_PROCESS)
+            except WindowsError as e:
+                echo_error("Please make sure IrfanView is installed and the full path to i_view32.exe is given in the json configuration file.")
+                raise e
+        echo_info("Waiting for new images... (hit Ctrl-C to quit)")
+
+
+def watch_folder(path):
     event_handler = EventHandler()
     observer = Observer()
     observer.schedule(event_handler, path, recursive=False)
-    print "Watching folder {0}".format(path)
+    echo_info("Watching folder {0} (hit Ctrl-C to quit)".format(path))
     observer.start()
     try:
         while True:
             time.sleep(1)
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, SystemExit):
         observer.stop()
     observer.join()
     return
-        
-    
-def main():
-    foldername = raw_input("Please provide a folder name\n")
-    if not os.path.exists(foldername):
-        print "Folder {0} doesn't exist".format(foldername)
-        raw_input("Click enter to finish...")
-    else:
-        while True:
-            action = raw_input("Watch folder? (y - run continously; n - run once; q - quit) ").lower()                                
-            if action == 'y':
-                watch_folder(foldername)
-            elif action == 'n':
-                os.chdir(foldername)
-                process_folder()
-                os.chdir("..")
-            else:
-                break
-    raw_input("Click enter to finish...")
-    
+
+
+@click.option('-v/-V', '--verbose/--no-verbose', default=True, 
+    help="Print informational messages")
+@click.option('--watch', type=click.Choice(['y', 'n', 'q']), prompt="Watch folder? (y - run continously; n - run once; q - quit)", 
+    help="Watch the folder for new files (y), just process it once (n), or quit (q).")
+@click.option('--where', is_flag=True, default=False, is_eager=True, callback=where, 
+    help='Print the path where Sid is installed an exit.')
+@click.option('--path', prompt="Please provide a folder name", type=click.Path(exists=True, readable=True), 
+    help="Folder of images to process.")
+@click.option('--config_file', default=os.path.splitext(__file__)[0] + '.json', type=click.Path(exists=True, readable=True),
+    help='Configuration file.')
+@click.version_option(version=Sid.__version__, prog_name=Sid.__name__)
+@click.command()
+def main(path, watch, config_file, verbose, where):
+    '''Process a folder of seed images, producing a table of statistics.
+    See https://github.com/yoavram/Sid.
+    '''
+    if not verbose:        
+        global echo_info
+        echo_info = lambda x: x
+        import warnings
+        warnings.simplefilter(action="ignore", category=FutureWarning)
+
+    global CONFIG
+    try:
+        with click.open_file(config_file, "r") as f:
+            CONFIG = json.load(f)
+    except IOError as e:
+        ioerror_to_click_exception(e)
+    echo_info("Reading configuration from {0}".format(click.format_filename(config_file)))
+
+    if watch == 'y':
+        watch_folder(path)        
+    elif watch == 'n':
+        process_folder(path)
+    elif watch == 'q':
+        echo('Quitting')
+    click.pause('Press any key to quit...')
+
 
 if __name__ == '__main__':
     main()
