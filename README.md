@@ -1,44 +1,97 @@
 # Sid
-## Image processing scripts for seed pictures
-<img src="https://raw.githubusercontent.com/yoavram/Sid/master/Sid.png" width="100" alt="Siddhartha">
+## Image processing for seed images
 
-Python scripts for image processing of photos of plant seeds, specifically _Lamium amplexicaule_.
+                      smddms`                     
+                     oN.  /Mo                     
+                   /hm/    -mh-                   
+                  oN+`      `oN+                  
+                 `Mo          oh                  
+                 :Mmsyysssyys/mN-                 
+                `Nmdo.`````./hdNy                 
+                 Nh`         ``ms                 
+                 hm``        `-M/                 
+                 +Mmm+     `hmNN`                 
+                  :+my     .Mds-                  
+              .:oyyys.      :oyyyo/-`             
+            /hhs:.`            `.:oyds.           
+           /M/`                     .dd           
+           hd                        :M.          
+          `N/                         N+          
+          :M`   +.              `y.   yh          
+          sm   +N`               om`  +M`         
+          my  .N+                `my  .M:         
+         `M:  yd                  /M:  ds         
+         :m   od/`              `:hh-  sd         
+         oN-`  -hds+oyy+``/yhssyhh:  `.dm         
+       .+mNmho:.`-+++NMMmmMMMo-:-`./ohddNy-`      
+    `/ydo-  ./ohhy+:+NMMMMMMMo+sydds/.  -oddo-`   
+  -sds:         `-:///////////::-`         -odh+` 
+.yd/`                                         -ym:
+md                                              sN
+hm-`                                           -dh
+ +hmmddddhhhhhhhhhhhhhhhhhhhhhyyyyyyyyyyyyyyhhhy/ 
+
+Python script for image processing of plant seed images, specifically _Lamium amplexicaule_.
+
+[![PyPI](https://img.shields.io/pypi/v/Sid.svg)](https://pypi.python.org/pypi/Sid/)
+[![Supported Python versions](https://img.shields.io/pypi/pyversions/Sid.svg)](https://pypi.python.org/pypi/Sid/)
+[![License](https://img.shields.io/pypi/l/Sid.svg)](https://github.com/yoavram/Sid/blob/master/LICENCE.txt)
+[![Build Status](https://travis-ci.org/yoavram/Sid.svg)](https://travis-ci.org/yoavram/Sid)
+[![codecov.io](http://codecov.io/github/yoavram/Sid/coverage.svg?branch=master)](http://codecov.io/github/yoavram/Sid)
 
 ## Requirements
 
-- *Python 2.7*
-- *PIL*/*PILLOW* - Image processing library. 
-- *numpy* - The ultimate numerical python packge.
-- *scipy* - The ultimate scientific python package (the _ndimage_  is required).
-- *scikit-image* - Another image processing library
+- Python 2.7
+- PIL/Pillow
+- numpy
+- scipy.ndimage
+- scikit-image
+- matplotlib
+- watchdog
+- click
+
+For testing and documentation:
+
+- nose
+- coverage
+- sphinx
 
 ## Install
 
-Python can be downloaded from [python.org](http://www.python.org/download/releases/2.7.6/)
+1. Install the [Anaconda Python 2.7 distribution](https://www.continuum.io/downloads).
+1. Install Sid using pip:
+```
+pip install Sid
+```
+1. Check that Sid was installed properly:
+```
+take_cover --version
+```
 
-Windows installers for *numpy*, *scipy*, *PILLOW* (*PIL* stand-in) and *scikit-image* can be downloaded from [Gohlke's website](http://www.lfd.uci.edu/~gohlke/pythonlibs/).
+### Developers
 
-Another option for windows is to use the [Anaconda python distribution](https://store.continuum.io/cshop/anaconda/) (free).
-
-Sid can then be downloaded by cloning the repository:
+Sid can also be used by cloning the repository, usually for developing purposes:
 ```
 git clone https://github.com/yoavram/Sid.git
 ```
-of by downloading the repository as a [zip file](https://github.com/yoavram/Sid/archive/master.zip).
-
-The only files that are required for analyzing seed photos are `take_cover.py` and `take_cover.json` (see details below).
+or by downloading the repository as a [zip file](https://github.com/yoavram/Sid/archive/master.zip).
 
 ## Usage
 
-### take_cover.py
+### take_cover
 
 Use by running:
 ```
-python take_cover.py
+take_cover
 ```
 The script will first ask for a folder name - this will be the working directory from which the script will read _jpg_ files and to which it will write _png_ and _csv_ files.
 
 The script will then ask if the folder should be prcoessed Continuously or once.
+
+For more options, see the help message:
+```
+take_cover --help
+```
 
 ## Continuous processing
 
@@ -52,7 +105,17 @@ In this case the script will go over all _jpg_ files in the folder and process t
 
 This is the configuration file which includes values of different parameters of the algorithm, including segmentation thresholds. 
 
+## Support
+Don't hesitate to contact [Yoav Ram](http://www.yoavram.com) for questions and help.
+
+Bugs and feature requests can be opened on [GitHub](https://github.com/yoavram/Sid/issues) 
+
+[![GitHub issues](https://img.shields.io/github/issues/yoavram/Sid.svg)](https://github.com/yoavram/Sid)
+
+
 ## License
 
-The scripts are available for use under the CC-BY-SA 3.0 license. If the scripts are used or remixed for use or support of an academic publication, please contact [Yoav Ram](https://github.com/yoavram) regarding proper attribution.
+Sid source code and examples are licensed under the terms of the [MIT license](http://opensource.org/licenses/MIT).
+
+Sid documentation, examples, and other materials are licensed under the terms of the [Creative Commons Attribution 4.0 International (CC BY 4.0) license](https://creativecommons.org/licenses/by/4.0/).
 
