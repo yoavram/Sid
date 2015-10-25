@@ -27,11 +27,9 @@ before_install:
 
 # Install packages
 install:
-  - conda install -q python=$TRAVIS_PYTHON_VERSION pip requests conda-build jinja2 anaconda-client atlas numpy scipy matplotlib scikit-image pillow coverage nose sphinx
-  - pip install watchdog click
+  - conda install -q python=$TRAVIS_PYTHON_VERSION pip requests atlas numpy scipy matplotlib scikit-image pillow coverage nose sphinx
+  - pip install watchdog click twine
   - python setup.py install
-#  - conda build conda-recipe
-#  - conda install --use-local Sid
 
 # Run test
 script:
@@ -41,3 +39,15 @@ script:
 after_success:
 # Code coverage
   - codecov
+
+deploy:
+# Deploy to pypi
+  provider: pypi
+  user: yoavram
+  password:
+    secure: V4fgfbd6NfIPyjPnfWWPOpAq1LtIarBZ4PLQhXSLuhOSi1THU/qdnpwtAzotE1uyMdrZNUU0lYx+8mezCeX3w+1eg7bQeXn6L5VH+vTYJQ/nSmELKeQO44ePKCQDTJFwyhunDIySieLhb87sHcoXGxT4JdRgVP32gVeOKVGH7a0=
+  on:
+    tags: true
+    repo: yoavram/Sid
+    branch: master
+  distributions: "sdist bdist_wheel"

@@ -33,8 +33,8 @@ hm-`                                           -dh
 
 Python script for image processing of plant seed images, specifically _Lamium amplexicaule_.
 
-[![PyPI](https://img.shields.io/pypi/v/nine.svg)](https://pypi.python.org/pypi/Sid/)
-[![Supported Python versions](https://img.shields.io/pypi/pyversions/curveball.svg)](https://pypi.python.org/pypi/Sid/)
+[![PyPI](https://img.shields.io/pypi/v/Sid.svg)](https://pypi.python.org/pypi/Sid/)
+[![Supported Python versions](https://img.shields.io/pypi/pyversions/Sid.svg)](https://pypi.python.org/pypi/Sid/)
 [![License](https://img.shields.io/pypi/l/Sid.svg)](https://github.com/yoavram/Sid/blob/master/LICENCE.txt)
 [![Build Status](https://travis-ci.org/yoavram/Sid.svg)](https://travis-ci.org/yoavram/Sid)
 [![codecov.io](http://codecov.io/github/yoavram/Sid/coverage.svg?branch=master)](http://codecov.io/github/yoavram/Sid)
