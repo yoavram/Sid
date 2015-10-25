@@ -13,6 +13,7 @@ import json
 import csv
 from subprocess import Popen
 import time
+import datetime
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 from watchdog.events import FileCreatedEvent
@@ -32,6 +33,7 @@ INFO_COLOR = 'cyan'
 DETACHED_PROCESS = 0x00000008
 EXTENSION = ".jpg"
 CONFIG = {}
+NOW = datetime.datetime.now().ctime()
 
 echo = click.echo
 
@@ -56,6 +58,14 @@ def where(ctx, param, value):
     folder = os.path.split(path)[0]
     click.secho(click.format_filename(folder))
     ctx.exit()
+
+
+def logo(ctx, param, value):    
+    if not value or ctx.resilient_parsing:
+        return    
+    click.secho(Sid.__logo__, fg=INFO_COLOR)
+    ctx.exit()
+
 
 
 # Image processing functions
@@ -394,13 +404,15 @@ def watch_folder(path):
     help="Watch the folder for new files (y), just process it once (n), or quit (q).")
 @click.option('--where', is_flag=True, default=False, is_eager=True, callback=where, 
     help='Print the path where Sid is installed an exit.')
+@click.option('--logo', is_flag=True, default=False, is_eager=True, callback=logo, 
+    help='Print the Sid logo an exit.')
 @click.option('--path', prompt="Please provide a folder name", type=click.Path(exists=True, readable=True), 
     help="Folder of images to process.")
 @click.option('--config_file', default=os.path.splitext(__file__)[0] + '.json', type=click.Path(exists=True, readable=True),
     help='Configuration file.')
 @click.version_option(version=Sid.__version__, prog_name=Sid.__name__)
 @click.command()
-def main(path, watch, config_file, verbose, where):
+def main(path, watch, config_file, verbose, where, logo):
     '''Process a folder of seed images, producing a table of statistics.
     See https://github.com/yoavram/Sid.
     '''
@@ -416,7 +428,15 @@ def main(path, watch, config_file, verbose, where):
             CONFIG = json.load(f)
     except IOError as e:
         ioerror_to_click_exception(e)
-    echo_info("Reading configuration from {0}".format(click.format_filename(config_file)))
+
+    echo_info("*" * 50)
+    echo_info(Sid.__logo__)
+    echo_info("*" * 50)    
+    echo_info("{0}, version {1}".format(Sid.__name__, Sid.__version__).center(50))
+    echo_info(NOW.center(50))
+    echo_info("Configuration: {0}".format(click.format_filename(config_file)).center(50))
+    echo_info("*" * 50)
+
 
     if watch == 'y':
         watch_folder(path)        

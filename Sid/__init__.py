@@ -42,3 +42,34 @@ if sys.platform == 'win32':
 # end of trick
 
 from . import take_cover
+
+# http://www.text-image.com/convert/ascii.html
+__logo__ = """                      smddms`                     
+                     oN.  /Mo                     
+                   /hm/    -mh-                   
+                  oN+`      `oN+                  
+                 `Mo          oh                  
+                 :Mmsyysssyys/mN-                 
+                `Nmdo.`````./hdNy                 
+                 Nh`         ``ms                 
+                 hm``        `-M/                 
+                 +Mmm+     `hmNN`                 
+                  :+my     .Mds-                  
+              .:oyyys.      :oyyyo/-`             
+            /hhs:.`            `.:oyds.           
+           /M/`                     .dd           
+           hd                        :M.          
+          `N/                         N+          
+          :M`   +.              `y.   yh          
+          sm   +N`               om`  +M`         
+          my  .N+                `my  .M:         
+         `M:  yd                  /M:  ds         
+         :m   od/`              `:hh-  sd         
+         oN-`  -hds+oyy+``/yhssyhh:  `.dm         
+       .+mNmho:.`-+++NMMmmMMMo-:-`./ohddNy-`      
+    `/ydo-  ./ohhy+:+NMMMMMMMo+sydds/.  -oddo-`   
+  -sds:         `-:///////////::-`         -odh+` 
+.yd/`                                         -ym:
+md                                              sN
+hm-`                                           -dh
+ +hmmddddhhhhhhhhhhhhhhhhhhhhhyyyyyyyyyyyyyyhhhy/ """
