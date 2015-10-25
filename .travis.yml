@@ -27,7 +27,7 @@ before_install:
 
 # Install packages
 install:
-  - conda install -q python=$TRAVIS_PYTHON_VERSION pip requests atlas numpy scipy matplotlib scikit-image pillow coverage nose sphinx
+  - conda install -q python=$TRAVIS_PYTHON_VERSION pip requests atlas numpy scipy matplotlib scikit-image pillow coverage nose
   - pip install watchdog click twine
   - python setup.py install
 
@@ -39,6 +39,10 @@ script:
 after_success:
 # Code coverage
   - codecov
+
+before_deploy:
+# Install latest version of the docs packages
+  - pip install --upgrade sphinx sphinx-rtd-theme
 
 deploy:
 # Deploy to pypi
