@@ -33,7 +33,7 @@ ERROR_COLOR = 'red'
 INFO_COLOR = 'cyan'
 DETACHED_PROCESS = 0x00000008
 EXTENSION = ".jpg"
-DEFAULT_CONFIG_PATH = pkg_resources.resource_filename('Sid', os.path.splitext(__file__)[0] + '.json')
+DEFAULT_CONFIG_PATH = pkg_resources.resource_filename('Sid', os.path.splitext(os.path.basename(__file__))[0] + '.json')
 CONFIG = {}
 NOW = datetime.datetime.now().ctime()
 
