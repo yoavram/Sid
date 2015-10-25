@@ -25,6 +25,7 @@ from scipy.ndimage import label, binary_opening
 from scipy.ndimage import filters as scipy_filters
 from PIL import Image
 import click
+import pkg_resources
 import Sid
 
 
@@ -32,6 +33,7 @@ ERROR_COLOR = 'red'
 INFO_COLOR = 'cyan'
 DETACHED_PROCESS = 0x00000008
 EXTENSION = ".jpg"
+DEFAULT_CONFIG_PATH = pkg_resources.resource_filename('Sid', os.path.splitext(__file__)[0] + '.json')
 CONFIG = {}
 NOW = datetime.datetime.now().ctime()
 
@@ -408,11 +410,11 @@ def watch_folder(path):
     help='Print the Sid logo an exit.')
 @click.option('--path', prompt="Please provide a folder name", type=click.Path(exists=True, readable=True), 
     help="Folder of images to process.")
-@click.option('--config_file', default=os.path.splitext(__file__)[0] + '.json', type=click.Path(exists=True, readable=True),
-    help='Configuration file.')
+@click.option('--config_path', default=DEFAULT_CONFIG_PATH, type=click.Path(exists=True, readable=True),
+    help='Configuration file path.')
 @click.version_option(version=Sid.__version__, prog_name=Sid.__name__)
 @click.command()
-def main(path, watch, config_file, verbose, where, logo):
+def main(path, watch, config_path, verbose, where, logo):
     '''Process a folder of seed images, producing a table of statistics.
     See https://github.com/yoavram/Sid.
     '''
@@ -424,7 +426,7 @@ def main(path, watch, config_file, verbose, where, logo):
 
     global CONFIG
     try:
-        with click.open_file(config_file, "r") as f:
+        with click.open_file(config_path, "r") as f:
             CONFIG = json.load(f)
     except IOError as e:
         ioerror_to_click_exception(e)
@@ -434,9 +436,8 @@ def main(path, watch, config_file, verbose, where, logo):
     echo_info("*" * 50)    
     echo_info("{0}, version {1}".format(Sid.__name__, Sid.__version__).center(50))
     echo_info(NOW.center(50))
-    echo_info("Configuration: {0}".format(click.format_filename(config_file)).center(50))
+    echo_info("Configuration: {0}".format(click.format_filename(config_path)).center(50))
     echo_info("*" * 50)
-
 
     if watch == 'y':
         watch_folder(path)        

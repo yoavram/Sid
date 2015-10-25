@@ -1,13 +1,7 @@
-include setup.py setup.cfg README.md LICENCE.txt MANIFEST.in PKG-INFO CHANGELOG.md environment.yml
-exclude *.pyc .* 
-recursive-include Sid *.py
-recursive-include tests *.py
-recursive-exclude Sid *.pyc
-recursive-exclude tests *.pyc
-include images/__init__.py
+include setup.py setup.cfg README.md LICENCE.txt MANIFEST.in PKG-INFO environment.yml
+include versioneer.py
+include Sid/_version.py
 include images/0615-1.jpg
 include images/0615-2.jpg
 include images/0615-3.jpg
-include versioneer.py
-include Sid/_version.py
 include Sid/take_cover.json

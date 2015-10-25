@@ -41,6 +41,11 @@ if sys.platform == 'win32':
 	win32api.SetConsoleCtrlHandler(handler, 1)
 # end of trick
 
+CI = os.environ.get('CI', 'false').lower() == 'true'
+if CI:
+  import matplotlib
+  matplotlib.use('Agg')
+
 from . import take_cover
 
 # http://www.text-image.com/convert/ascii.html

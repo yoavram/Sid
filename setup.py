@@ -41,16 +41,16 @@ setup(
     ],
     packages=find_packages(),
     include_package_data=True,
-    data_files=[
-        ('images', [
-            'images/0615-1.jpg', 
-            'images/0615-2.jpg', 
-            'images/0615-3.jpg'
-        ]),
-        ('Sid', [
-            'Sid/take_cover.json'
-        ]),
-    ],
+    package_data={
+        'Sid.images': [
+            '0615-1.jpg', 
+            '0615-2.jpg', 
+            '0615-3.jpg'
+        ],
+        'Sid': [
+            'take_cover.json'
+        ],
+    },    
     install_requires=[
     # add your dependencies here
     # remember to use 'package-name>=x.y.z,<x.y+1.0' notation (this way you get bugfixes)
@@ -61,6 +61,7 @@ setup(
         'pillow',
         'watchdog',
         'click',
+        'colorama',
     ],
     extras_require={
         # https://www.python.org/dev/peps/pep-0426/#environment-markers

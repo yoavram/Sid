@@ -71,7 +71,7 @@ class MainTestCase(TestCase):
 
 
 	def setUp(self):
-		self.files = pkg_resources.resource_listdir('images', '')
+		self.files = pkg_resources.resource_listdir('Sid.images', '')
 		self.files = [fn for fn in self.files if os.path.splitext(fn)[-1] == Sid.take_cover.EXTENSION]
 		self.files.sort()
 		self.runner = CliRunner()
@@ -81,7 +81,7 @@ class MainTestCase(TestCase):
 		self.assertTrue(os.path.isdir(self.dirpath))
 
 		for fn in self.files:
-			src = pkg_resources.resource_filename('images', fn)
+			src = pkg_resources.resource_filename('Sid.images', fn)
 			shutil.copy(src, '.')
 			self.assertTrue(os.path.exists(os.path.join(self.dirpath, fn)))
 			self.assertTrue(os.path.isfile(os.path.join(self.dirpath, fn)))

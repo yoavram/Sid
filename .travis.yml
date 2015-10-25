@@ -34,7 +34,7 @@ install:
 # Run test
 script:
   - take_cover --version
-  - nosetests tests --with-coverage --cover-package=Sid
+  - nosetests Sid/tests --with-coverage --cover-package=Sid
 
 after_success:
 # Code coverage
