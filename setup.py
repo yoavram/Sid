@@ -12,29 +12,16 @@ from setuptools import setup, find_packages
 import os
 import versioneer
 
-with open('README.md') as f:
-    README = f.read()
+README = """Python script for image processing of plant seed images, specifically *Lamium amplexicaule*.
 
-
-# add your dependencies here
-# remember to use 'package-name>=x.y.z,<x.y+1.0' notation (this way you get bugfixes)
-reqs = ['numpy',
-        'scipy',
-        'matplotlib',
-        'scikit-image',
-        'pillow',
-        'watchdog',
-        'click'
-        ]
-import sys
-if sys.platform == 'win32':
-    reqs.append('pypiwin32')
+See https://github.com/yoavram/Sid.
+"""
 
 setup(
     name='Sid',
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
-    description=' Image processing for seed images',
+    description='Image processing for seed images',
     long_description=README,
     keywords='biology image-processing plant-science',
     author='Yoav Ram',
@@ -42,7 +29,7 @@ setup(
     url='https://github.com/yoavram/Sid',
     license='MIT',
     classifiers=[
-        'Development Status :: 1 - Planning',
+        'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
         'Intended Audience :: End Users/Desktop',
         'Intended Audience :: Science/Research',
@@ -54,11 +41,32 @@ setup(
     ],
     packages=find_packages(),
     include_package_data=True,
-    data_files=[('images', ['images/0615-1.jpg', 'images/0615-2.jpg', 'images/0615-3.jpg']),
-                ('Sid', ['Sid/take_cover.json']),
+    data_files=[
+        ('images', [
+            'images/0615-1.jpg', 
+            'images/0615-2.jpg', 
+            'images/0615-3.jpg'
+        ]),
+        ('Sid', [
+            'Sid/take_cover.json'
+        ]),
     ],
-    install_requires=reqs,        
+    install_requires=[
+    # add your dependencies here
+    # remember to use 'package-name>=x.y.z,<x.y+1.0' notation (this way you get bugfixes)
+        'numpy',
+        'scipy',
+        'matplotlib',
+        'scikit-image',
+        'pillow',
+        'watchdog',
+        'click',
+    ],
     extras_require={
+        # https://www.python.org/dev/peps/pep-0426/#environment-markers
+        ':sys_platform == "win32"': [
+            'pypiwin32'
+        ],
         'tests': [
             'nose',
             'coverage',
