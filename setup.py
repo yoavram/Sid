@@ -28,13 +28,13 @@ reqs = ['numpy',
         ]
 import sys
 if sys.platform == 'win32':
-    sys.append('pypiwin32')
+    reqs.append('pypiwin32')
 
 setup(
     name='Sid',
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
-    description=' Image processing for seed pictures',
+    description=' Image processing for seed images',
     long_description=README,
     keywords='biology image-processing plant-science',
     author='Yoav Ram',
