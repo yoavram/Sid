@@ -265,19 +265,18 @@ def process_image(image_id):
     ax[2, 1].text(0.1, 0.5, "This plot left blank")
 
 # measure square
-    image_yellow = image_rgb[:, :, 2] > 200
+    image_yellow = image_rgb[:, :, 2] > CONFIG["ref_th"]
     plot_image(image_yellow, ax[3, 0], title="yellow mask")
-    image_yellow = binary_opening(image_yellow, square(1), 10)
+    image_yellow = binary_opening(image_yellow, square(CONFIG["ref_binary_opening"]), 10)
     image_yellow = image_yellow ^ bg_no_dilation
     image_yellow = erosion(image_yellow, square(3))
     #plot_image(image_yellow, ax[3, 1], title="yellow xor bg")
-    labels_yellow,n_yellow = label(~image_yellow)
+    labels_yellow,n_yellow = label(image_yellow)
     regions_yellow = measure.regionprops(labels_yellow)
     regions_yellow.sort(key=lambda x: x.area, reverse=True)
     plot_image(labels_yellow, ax[3, 1], title="yellow ref")
         
-    # final
-    #print "final"
+# final
     output_img = image_rgb.copy()
     output_img[:, :] = (0, 0, 0)
     output_img[cover_mask] = (0, 255, 0)

@@ -1,6 +1,8 @@
 {
     "min_otsu_th": 0.75,
     "cover_th": 0.45,
+    "ref_th": 200,
+    "ref_binary_opening": 2,
     "binary_opening_size": 2,
     "binary_opening_iters": 10,
     "eliosom_th_factor": 1.2,
