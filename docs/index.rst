@@ -120,7 +120,7 @@ Developers should clone the repository from GitHub and install it in *editable* 
 - Continuous integration and deployment is performed by `Travis-CI <https://travis-ci.org/yoavram/Sid>`_
 - Code coverage is tracked by `codecov.io <http://codecov.io/github/yoavram/Sid>`_
 - Package is hosted on `PyPi <https://pypi.python.org/pypi/Sid/>`_
-- Documentation is hosted by `PythonHosted <http://pythonhosted.org/Sid/>`_
+- Documentation is hosted by `Read The Docs <http://sid.readthedocs.org/>`_
 - Documentation is built with `Sphinx <http://sphinx-doc.org/>`_
 
 Licence
@@ -138,7 +138,7 @@ Sid documentation, examples, and other materials are licensed under the terms of
    :target: https://github.com/yoavram/Sid/blob/master/LICENCE.txt
 .. |Build Status| image:: https://travis-ci.org/yoavram/Sid.svg?branch=master
     :target: https://travis-ci.org/yoavram/Sid
-.. |Docs| image:: https://img.shields.io/badge/docs-latest-yellow.svg
-   :target: http://pythonhosted.org/Sid/
+.. |Docs| image:: https://readthedocs.org/projects/sid/badge/?version=latest
+   :target: http://sid.readthedocs.org/en/latest/?badge=latest
 .. |codecov.io| image:: http://codecov.io/github/yoavram/Sid/coverage.svg?branch=master
    :target: http://codecov.io/github/yoavram/Sid
