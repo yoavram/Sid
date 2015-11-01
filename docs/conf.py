@@ -293,5 +293,5 @@ texinfo_documents = [
 #texinfo_no_detailmenu = False
 
 # Edit on GitHub - https://gist.github.com/MantasVaitkunas/7c16de233812adcb7028#file-edit_on_github-py-L38-L43
-edit_on_github_project = 'yoavram/curveball'
+edit_on_github_project = 'yoavram/Sid'
 edit_on_github_branch = 'master'
