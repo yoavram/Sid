@@ -43,9 +43,9 @@ setup(
     include_package_data=True,
     package_data={
         'Sid.images': [
-            '0615-1.jpg', 
-            '0615-2.jpg', 
-            '0615-3.jpg'
+            'image1.jpg', 
+            'image2.jpg', 
+            'image3.jpg'
         ],
         'Sid': [
             'take_cover.json'

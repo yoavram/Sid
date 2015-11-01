@@ -1,7 +1,7 @@
 include setup.py setup.cfg README.md LICENCE.txt MANIFEST.in PKG-INFO environment.yml
 include versioneer.py
 include Sid/_version.py
-include images/0615-1.jpg
-include images/0615-2.jpg
-include images/0615-3.jpg
+include images/image1.jpg
+include images/image2.jpg
+include images/image3.jpg
 include Sid/take_cover.json
