@@ -25,6 +25,7 @@ Requirements
 - matplotlib
 - watchdog
 - click
+- pywin32 (on Windows)
 
 For testing and documentation:
 
@@ -36,16 +37,37 @@ Install
 -------
 
 1. Install the `Anaconda Python 2.7 distribution <https://www.continuum.io/downloads>`_.
-2. Install Sid using :command:`pip`:
+
+2. Update all Python packages using :command:`conda`:
+
+>>> conda update --all --yes
+
+3. Install Sid using :command:`pip`:
 
 >>> pip install Sid
 
-3. Check that Sid was installed properly by running the :command:`take_cover` script:
+4. Check that Sid was installed properly by running the :command:`take_cover` script:
 
 >>> take_cover --version
 Sid, version x.x.x
 
 where ``x.x.x`` will be replaced by the current version (|release|).
+
+.. tip::
+
+	When installing on **Windows**, if you get an error trying to install *pywin32* or *pypiwin32*, try to run:
+
+	>>> conda install pywin32 --yes
+
+Upgrade
+^^^^^^^
+
+To upgrade to the newest version of Sid (|release|):
+
+>>> conda update --all --yes
+>>> pip install --upgrade Sid
+>>> take_cover --version
+Sid, version x.x.x
 
 Usage
 -----
@@ -54,7 +76,7 @@ Use by running:
 
 >>> take_cover
 
-The script will first ask for a folder name - this will be the working directory from which the script will read ``.jpg`` files and to which it will write ``.png`` and _csv_ files.
+The script will first ask for a folder name - this will be the working directory from which the script will read ``.jpg`` files and to which it will write ``.png`` and ``.csv`` files.
 
 The script will then ask if the folder should be prcoessed Continuously or once.
 
@@ -70,7 +92,7 @@ In this case the script will wait for new ``.jpg`` files in the folder. When a n
 Single processing
 ^^^^^^^^^^^^^^^^^
 
-In this case the script will go over all ``.jpg`` files in the folder and process them. It will produce ``.png`` files with the color spaces and the segmentation checkpoints and two _csv_ files: one with the final stats for each ``.jpg`` file and one with the histograms that were used to find the features on the seed (background, eliosom, cover). 
+In this case the script will go over all ``.jpg`` files in the folder and process them. It will produce ``.png`` files with the color spaces and the segmentation checkpoints and two ``.csv`` files: one with the final stats for each ``.jpg`` file and one with the histograms that were used to find the features on the seed (background, eliosom, cover). 
 
 Configuration file
 ^^^^^^^^^^^^^^^^^^
@@ -114,8 +136,8 @@ Sid documentation, examples, and other materials are licensed under the terms of
    :target: https://pypi.python.org/pypi/Sid/
 .. |License| image:: https://img.shields.io/pypi/l/Sid.svg
    :target: https://github.com/yoavram/Sid/blob/master/LICENCE.txt
-.. |Build Status| image:: https://travis-ci.org/yoavram/Sid.svg
-   :target: https://travis-ci.org/yoavram/Sid
+.. |Build Status| image:: https://travis-ci.org/yoavram/Sid.svg?branch=master
+    :target: https://travis-ci.org/yoavram/Sid
 .. |Docs| image:: https://img.shields.io/badge/docs-latest-yellow.svg
    :target: http://pythonhosted.org/Sid/
 .. |codecov.io| image:: http://codecov.io/github/yoavram/Sid/coverage.svg?branch=master
