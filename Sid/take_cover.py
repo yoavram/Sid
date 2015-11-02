@@ -415,7 +415,7 @@ def watch_folder(path):
 @click.command()
 def main(path, watch, config_path, verbose, where, logo):
     '''Process a folder of seed images, producing a table of statistics.
-    See documentation at http://pythonhosted.org/Sid.
+    See documentation http://sid.readthedocs.org.
     '''
     if not verbose:        
         global echo_info
