@@ -217,12 +217,15 @@ def process_image(image_id):
     axis.legend(loc="upper left", fontsize=10)
     bg = binary_opening(bg, square(CONFIG["binary_opening_size"]), CONFIG["binary_opening_iters"])
     bg_no_dilation = bg.copy()
-    bg_for_cover =  dilation(bg, square(15))
+    bg_for_cover =  dilation(bg, square(CONFIG["cover_dilation_size"]))
+    bg_for_eliosom = dilation(bg, square(CONFIG["eliosom_dilation_size"]))
     bg = dilation(bg, square(CONFIG["dilation_size"]))
     bg = bg > 0
     bg_for_cover = bg_for_cover > 0
+    bg_for_eliosom = bg_for_eliosom > 0
     fg = ~bg
     fg_for_cover = ~bg_for_cover
+    fg_for_eliosom = ~bg_for_eliosom
     plot_image(bg, ax=ax[0,3], title="bg - bin open & dilation")
 
 # labels
@@ -238,7 +241,7 @@ def process_image(image_id):
     th = filters.threshold_yen(lab_smooth_B) * CONFIG["eliosom_th_factor"]
     axis, eliosom_histogram = plot_hist(lab_smooth_B, ax[1, 2], th=th, title="lab smooth B")
     eliosom_mask = lab_smooth_B > th
-    eliosom_mask = eliosom_mask & fg
+    eliosom_mask = eliosom_mask & fg_for_eliosom
     eliosom_mask[:,:centroid_y] = False
     img_eliosom = image_rgb.copy()
     img_eliosom[eliosom_mask] = (255, 0, 0)
@@ -251,9 +254,10 @@ def process_image(image_id):
     centroid_x, centroid_y = props['centroid']
 
 # cover
+
     gray = color_spaces["gray"]
     plot_image(gray, ax=ax[2, 0], title="gray")
-    th = (gray[fg > 0].mean()) * 1.1
+    th = (gray[fg > 0].mean()) * CONFIG["cover_th_factor"]
     axis, cover_histogram = plot_hist(gray, ax[2, 2], th=th, title="gray")
     cover_mask = gray > th    
     cover_mask = (cover_mask & fg_for_cover) & ~eliosom_mask
@@ -422,14 +426,14 @@ def main(path, watch, config_path, verbose, where, logo):
         echo_info = lambda x: x
         import warnings
         warnings.simplefilter(action="ignore", category=FutureWarning)
+        warnings.simplefilter(action="ignore", category=DeprecationWarning)
 
     global CONFIG
     try:
         with click.open_file(config_path, "r") as f:
             CONFIG = json.load(f)
     except IOError as e:
-        ioerror_to_click_exception(e)
-
+        ioerror_to_click_exception(e)    
     echo_info("*" * 50)
     echo_info(Sid.__logo__)
     echo_info("*" * 50)    
