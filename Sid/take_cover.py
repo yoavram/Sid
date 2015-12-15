@@ -208,10 +208,10 @@ def process_image(image_id):
     plot_image(gray, ax=ax[0,0], title="gray")
     otsu_th = filters.threshold_otsu(gray)
     mean_th = gray.mean()
-    th = otsu_th if otsu_th > CONFIG["min_otsu_th"] else mean_th
-    bg = gray > th
-    plot_image(bg, ax=ax[0,1], title="mask th=%.4f" % th)
-    axis, bg_histogram = plot_hist(gray[gray<1], ax[0,2], th=th, title="gray")
+    bg_th = otsu_th if otsu_th > CONFIG["min_otsu_th"] else mean_th
+    bg = gray > bg_th
+    plot_image(bg, ax=ax[0,1], title="mask th=%.4f" % bg_th)
+    axis, bg_histogram = plot_hist(gray[gray<1], ax[0,2], th=bg_th, title="gray")
     axis.axvline(x=mean_th, color='b', ls='--', label="mean")
     axis.axvline(x=otsu_th, color='g', ls='--', label="otsu")
     axis.legend(loc="upper left", fontsize=10)
@@ -238,9 +238,9 @@ def process_image(image_id):
     plot_image(color_spaces['lab'][:,:,2], ax=ax[1, 0], title="lab B")
     lab_smooth_B = smooth(color_spaces["lab"])[:, :, 2]
     plot_image(lab_smooth_B, ax=ax[1, 1], title="lab smooth B")
-    th = filters.threshold_yen(lab_smooth_B) * CONFIG["eliosom_th_factor"]
-    axis, eliosom_histogram = plot_hist(lab_smooth_B, ax[1, 2], th=th, title="lab smooth B")
-    eliosom_mask = lab_smooth_B > th
+    eliosom_th = filters.threshold_yen(lab_smooth_B) * CONFIG["eliosom_th_factor"]
+    axis, eliosom_histogram = plot_hist(lab_smooth_B, ax[1, 2], th=eliosom_th, title="lab smooth B")
+    eliosom_mask = lab_smooth_B > eliosom_th
     eliosom_mask = eliosom_mask & fg_for_eliosom
     eliosom_mask[:,:centroid_y] = False
     img_eliosom = image_rgb.copy()
@@ -254,12 +254,11 @@ def process_image(image_id):
     centroid_x, centroid_y = props['centroid']
 
 # cover
-
     gray = color_spaces["gray"]
     plot_image(gray, ax=ax[2, 0], title="gray")
-    th = (gray[fg > 0].mean()) * CONFIG["cover_th_factor"]
-    axis, cover_histogram = plot_hist(gray, ax[2, 2], th=th, title="gray")
-    cover_mask = gray > th    
+    cover_th = (gray[fg > 0].mean()) * CONFIG["cover_th_factor"]
+    axis, cover_histogram = plot_hist(gray, ax[2, 2], th=cover_th, title="gray")
+    cover_mask = gray > cover_th
     cover_mask = (cover_mask & fg_for_cover) & ~eliosom_mask
     img_cover = image_rgb.copy()
     img_cover[cover_mask] = (0, 255, 0)
@@ -303,6 +302,9 @@ def process_image(image_id):
         "blue_area":    h * w - np.sum(output_img[:, :, 2] > 0),
         "cover_area":   np.sum(output_img[:, :, 1] > 0),
         "eliosom_area": np.sum(output_img[:, :, 0] > 0),
+        "bg_th":        bg_th,
+        "eliosom_th":   eliosom_th,
+        "cover_th":     cover_th,
         "length":       props.major_axis_length,
         "width":        props.minor_axis_length,
         "area":         props.area,
@@ -433,7 +435,8 @@ def main(path, watch, config_path, verbose, where, logo):
         with click.open_file(config_path, "r") as f:
             CONFIG = json.load(f)
     except IOError as e:
-        ioerror_to_click_exception(e)    
+        ioerror_to_click_exception(e)
+
     echo_info("*" * 50)
     echo_info(Sid.__logo__)
     echo_info("*" * 50)    
