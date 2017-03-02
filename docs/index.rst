@@ -6,7 +6,7 @@
 Sid: image processing for seed images
 =======================================
 
-|PyPi| |Supported Python versions| |License| |Build Status| |Docs| |codecov.io| 
+|PyPi| |Supported Python versions| |License| |Build Status| |Docs| |codecov.io| |Zenodo|
 
 
 **Author**: `Yoav Ram <http://www.yoavram.com>`_
@@ -78,7 +78,7 @@ Use by running:
 
 The script will first ask for a folder name - this will be the working directory from which the script will read ``.jpg`` files and to which it will write ``.png`` and ``.csv`` files.
 
-The script will then ask if the folder should be prcoessed Continuously or once.
+The script will then ask if the folder should be processed Continuously or once.
 
 For more options, see the help message:
 
@@ -123,12 +123,12 @@ Developers should clone the repository from GitHub and install it in *editable* 
 - Documentation is hosted by `Read The Docs <http://sid.readthedocs.org/>`_
 - Documentation is built with `Sphinx <http://sphinx-doc.org/>`_
 
-Licence
+License
 -------
 
-Sid source code and examples are licensed under the terms of the `MIT licence <http://opensource.org/licenses/MIT>`_.
+Sid source code and examples are licensed under the terms of the `MIT license <http://opensource.org/licenses/MIT>`_.
 
-Sid documentation, examples, and other materials are licensed under the terms of the `Creative Commons Attribution 4.0 International (CC BY 4.0) licence <https://creativecommons.org/licenses/by/4.0/>`_
+Sid documentation, examples, and other materials are licensed under the terms of the `Creative Commons Attribution 4.0 International (CC BY 4.0) license <https://creativecommons.org/licenses/by/4.0/>`_
 
 .. |PyPi| image:: https://img.shields.io/pypi/v/Sid.svg
    :target: https://pypi.python.org/pypi/Sid/
@@ -142,3 +142,5 @@ Sid documentation, examples, and other materials are licensed under the terms of
    :target: http://sid.readthedocs.org/en/latest/?badge=latest
 .. |codecov.io| image:: http://codecov.io/github/yoavram/Sid/coverage.svg?branch=master
    :target: http://codecov.io/github/yoavram/Sid
+.. |Zenodo| image:: https://zenodo.org/badge/16996832.svg
+   :target: https://zenodo.org/badge/latestdoi/16996832

@@ -4,6 +4,7 @@
 [![Build Status](https://travis-ci.org/yoavram/Sid.svg?branch=master)](https://travis-ci.org/yoavram/Sid)
 [![Documentation Status](https://readthedocs.org/projects/sid/badge/?version=latest)](http://sid.readthedocs.org/en/latest/?badge=latest)
 [![codecov.io](http://codecov.io/github/yoavram/Sid/coverage.svg?branch=master)](http://codecov.io/github/yoavram/Sid)
+[![DOI](https://zenodo.org/badge/16996832.svg)](https://zenodo.org/badge/latestdoi/16996832)
 
 # Sid
 ## Image processing for seed images
