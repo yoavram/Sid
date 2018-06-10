@@ -93,14 +93,22 @@ class MainTestCase(TestCase):
 
 	def test_run_once(self):
 		num_files = len(self.files)
-		result = self.runner.invoke(Sid.take_cover.main, ['--verbose', '--path', self.dirpath, '--watch', 'n'])
-		self.assertEquals(result.exit_code, 0, result.output)
+		result = self.runner.invoke(
+			Sid.take_cover.main,
+			['--verbose', '--path', self.dirpath, '--watch', 'n'],
+		)
+		self.assertFalse(result.exception)
+		self.assertEquals(result.exit_code, 0, result.exit_code)
 		self.assertTrue(os.path.exists(os.path.join(self.dirpath, 'stats.csv')))
 		self.assertTrue(os.path.exists(os.path.join(self.dirpath, 'histograms.csv')))
 		pngs = glob.glob(os.path.join(self.dirpath, '*.png'))
 		self.assertEquals(len(pngs), num_files * 2)
-		with open('stats.csv', 'r') as f:
+		with open(os.path.join(self.dirpath, 'stats.csv'), 'r') as f:
 			data = csv.DictReader(f)
 			for row in data:
-				fn = os.path.split(row['image_id'])[-1] + Sid.take_cover.EXTENSION				
+				fn = os.path.split(row['image_id'])[-1] + Sid.take_cover.EXTENSION
 				self.assertIn(fn, self.files)
+
+
+if __name__ == '__main__':
+	main()
