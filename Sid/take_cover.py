@@ -217,7 +217,7 @@ def process_image(image_id):
     axis.legend(loc="upper left", fontsize=10)
     bg = binary_opening(bg, square(CONFIG["binary_opening_size"]), CONFIG["binary_opening_iters"])
     bg_no_dilation = bg.copy()
-    bg_for_cover =  dilation(bg, square(CONFIG["cover_dilation_size"]))
+    bg_for_cover = dilation(bg, square(CONFIG["cover_dilation_size"]))
     bg_for_eliosom = dilation(bg, square(CONFIG["eliosom_dilation_size"]))
     bg = dilation(bg, square(CONFIG["dilation_size"]))
     bg = bg > 0
@@ -242,7 +242,7 @@ def process_image(image_id):
     axis, eliosom_histogram = plot_hist(lab_smooth_B, ax[1, 2], th=eliosom_th, title="lab smooth B")
     eliosom_mask = lab_smooth_B > eliosom_th
     eliosom_mask = eliosom_mask & fg_for_eliosom
-    eliosom_mask[:,:centroid_y] = False
+    eliosom_mask[:,:int(centroid_y)] = False
     img_eliosom = image_rgb.copy()
     img_eliosom[eliosom_mask] = (255, 0, 0)
     plot_image(img_eliosom, ax[1, 3], title="eliosom")
