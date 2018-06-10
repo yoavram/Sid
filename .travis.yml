@@ -20,15 +20,14 @@ before_install:
   - ./miniconda.sh -b
   - export PATH=/home/travis/miniconda2/bin:$PATH
   - conda update --yes -q conda
-  - conda config --add channels yoavram
   - conda config --set always_yes true
   - conda config --set anaconda_upload no
   - pip install codecov
 
 # Install packages
 install:
-  - conda install -q python=$TRAVIS_PYTHON_VERSION pip requests atlas numpy scipy matplotlib scikit-image pillow coverage nose
-  - pip install watchdog click twine
+  - conda install -q python=$TRAVIS_PYTHON_VERSION pip requests atlas numpy scipy matplotlib scikit-image click pillow coverage nose 
+  - pip install watchdog twine
   - python setup.py install
 
 # Run test
