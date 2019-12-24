@@ -6,21 +6,24 @@
 Sid: image processing for seed images
 =======================================
 
-|PyPi| |Supported Python versions| |License| |Build Status| |Docs| |codecov.io| |Zenodo|
+|PyPi| |Supported Python versions| |License| |Build Status| |Docs| |codecov.io| |Zenodo| |FigShare|
 
 
 **Author**: `Yoav Ram <http://www.yoavram.com>`_
+
 **Source code**: `GitHub <https://github.com/yoavram/Sid/>`_
+
+**Dataset**: `FigShare <http://doi.org/10.6084/m9.figshare.11446380.v1>`_
 
 Sid is an open-source Python package for image processing of plant seed images, specifically *Lamium amplexicaule*.
 
 Requirements
 ------------
 
-- Python 2.7
+- Python
 - PIL/Pillow
 - numpy
-- scipy.ndimage
+- scipy
 - scikit-image
 - matplotlib
 - watchdog
@@ -36,7 +39,7 @@ For testing and documentation:
 Install
 -------
 
-1. Install the `Anaconda Python 2.7 distribution <https://www.continuum.io/downloads>`_.
+1. Install the `Anaconda Python distribution <https://www.anaconda.com/downloads>`_.
 
 2. Update all Python packages using :command:`conda`:
 
@@ -102,7 +105,7 @@ Configuration file
 Support
 -------
 
-Don't hesitate to contact `Yoav Ram <http://www.yoavram.com>`_ with questions and comments.
+Please contact `Yoav Ram <http://www.yoavram.com>`_ with questions and comments.
 
 Bugs and feature requests can be opened on `GitHub Issues <https://github.com/yoavram/Sid/issues>`_
 
@@ -144,3 +147,5 @@ Sid documentation, examples, and other materials are licensed under the terms of
    :target: http://codecov.io/github/yoavram/Sid
 .. |Zenodo| image:: https://zenodo.org/badge/16996832.svg
    :target: https://zenodo.org/badge/latestdoi/16996832
+.. |FigShare| image:: https://img.shields.io/badge/Dataset-FigShare-blueviolet
+   :target: http://doi.org/10.6084/m9.figshare.11446380.v1
