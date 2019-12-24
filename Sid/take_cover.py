@@ -176,7 +176,7 @@ def add_image(image, ax=None, cmap="Greys"):
 
 
 def plot_hist(image, ax, th=None, title=""):
-    counts, bins, patches = ax.hist(image.flatten(), normed=True, bins=20, color='w')
+    counts, bins, patches = ax.hist(image.flatten(), density=True, bins=20, color='w')
     ax.set_xticks(ax.get_xticks()[::2])
     ax.set_yticks(ax.get_yticks()[::2])
     if th:
