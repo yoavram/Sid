@@ -26,7 +26,7 @@ before_install:
 
 # Install packages
 install:
-  - conda install -q python=$TRAVIS_PYTHON_VERSION pip requests atlas numpy scipy matplotlib scikit-image click pillow coverage nose 
+  - conda install -q python=$TRAVIS_PYTHON_VERSION pip requests numpy scipy matplotlib scikit-image click pillow coverage nose 
   - pip install watchdog twine
   - python setup.py install
 
