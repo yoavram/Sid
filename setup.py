@@ -36,7 +36,7 @@ setup(
         'Topic :: Scientific/Engineering :: Bio-Informatics',
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
-        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.7',
         'Operating System :: OS Independent',
     ],
     packages=find_packages(),
