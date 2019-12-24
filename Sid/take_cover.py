@@ -334,8 +334,8 @@ def process_folder(path):
     stats_foutname = os.path.join(path, 'stats.csv')
     hist_foutname = os.path.join(path, 'histograms.csv')
     try:
-        stats_fout = click.open_file(stats_foutname, 'wb')
-        hist_fout = click.open_file(hist_foutname, 'wb')
+        stats_fout = click.open_file(stats_foutname, 'w')
+        hist_fout = click.open_file(hist_foutname, 'w')
     except IOError as e:
         ioerror_to_click_exception(e)
     stats_wr, hist_wr = None, None
