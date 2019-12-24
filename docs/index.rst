@@ -13,7 +13,7 @@ Sid: image processing for seed images
 
 **Source code**: `GitHub <https://github.com/yoavram/Sid/>`_
 
-**Dataset**: `FigShare <http://doi.org/10.6084/m9.figshare.11446380.v1>`_
+**Dataset**: `FigShare <http://doi.org/10.6084/m9.figshare.11446380>`_
 
 Sid is an open-source Python package for image processing of plant seed images, specifically *Lamium amplexicaule*.
 

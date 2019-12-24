@@ -21,5 +21,5 @@ Read the docs at <http://sid.readthedocs.org/>.
 
 ## Dataset
 
-> Zinger E, Ram Y, Hadany L, nir ohad. Lamium amplexicaule seed photo set for image characterization. 2019. doi:[10.6084/m9.figshare.11446380.v1](http://doi.org/10.6084/m9.figshare.11446380.v1)
+> Zinger E, Ram Y, Hadany L, nir ohad. Lamium amplexicaule seed photo set for image characterization. 2019. doi:[10.6084/m9.figshare.11446380](http://doi.org/10.6084/m9.figshare.11446380)
 
