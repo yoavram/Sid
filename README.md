@@ -14,3 +14,13 @@
 Python script for image processing of plant seed images, specifically _Lamium amplexicaule_.
 
 Read the docs at <http://sid.readthedocs.org/>.
+
+## Manuscript
+
+> Zinger E, Gueijman A, Obolski U, Ram Y, Ruby E, Binder M, Yechieli N, Ohad N, Hadany L. Less fit Lamium amplexicaule plants produce more dispersible seeds. Sci Rep. 2019;9(1):6299. doi:[10.1038/s41598-019-42158-1](http://doi.org/10.1038/s41598-019-42158-1)
+
+## Dataset
+
+> Zinger E, Ram Y, Hadany L, nir ohad. Lamium amplexicaule seed photo set for image characterization. 2019. doi:[10.6084/m9.figshare.11446380.v1](http://doi.org/10.6084/m9.figshare.11446380.v1)
+
+<iframe src="https://widgets.figshare.com/articles/11446380/embed?show_title=1" width="568" height="351" frameborder="0"></iframe>
