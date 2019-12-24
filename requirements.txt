@@ -3,7 +3,6 @@ click==5.1
 colorama==0.3.3
 decorator==4.0.4
 matplotlib>=1.0.0
-networkx==1.10
 numpy>=1.6.0
 pathtools==0.1.2
 Pillow==3.0.0
