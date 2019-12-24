@@ -34,7 +34,7 @@ sys.path.insert(0, os.path.abspath('_ext'))
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'edit_on_github', # https://gist.github.com/MantasVaitkunas/7c16de233812adcb7028#file-edit_on_github-py-L38-L43
+    # 'edit_on_github', # https://gist.github.com/MantasVaitkunas/7c16de233812adcb7028#file-edit_on_github-py-L38-L43
 ]
 
 # Add any paths that contain templates here, relative to this directory.
