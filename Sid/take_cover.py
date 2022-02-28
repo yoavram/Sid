@@ -23,7 +23,7 @@ from skimage import filters, color, measure
 from skimage.morphology import dilation, erosion, square
 from scipy.ndimage import label, binary_opening
 from scipy.ndimage import filters as scipy_filters
-from PIL import Image
+import imageio
 import click
 import pkg_resources
 import Sid
@@ -36,19 +36,21 @@ EXTENSION = ".jpg"
 DEFAULT_CONFIG_PATH = pkg_resources.resource_filename('Sid', os.path.splitext(os.path.basename(__file__))[0] + '.json')
 CONFIG = {}
 NOW = datetime.datetime.now().ctime()
-
 echo = click.echo
+
 
 def echo_error(message):
     click.secho("Error: %s" % message, fg=ERROR_COLOR)
 
+
 def echo_info(message):
     click.secho(message, fg=INFO_COLOR)
 
+
 def ioerror_to_click_exception(io_error):
-    if io_error.message:
+    try:
         message = io_error.message
-    else:
+    except AttributeError:
         message = 'Make sure that the file is not open and you have permission to write to this path.'
     raise click.FileError(io_error.filename, hint=message)
 
@@ -189,13 +191,9 @@ def plot_hist(image, ax, th=None, title=""):
 
 def process_image(image_id):
     echo_info("Starting {0}".format(image_id))
-    try:        
-        image = Image.open("{0}{1}".format(image_id, EXTENSION))
-    except IOError as e:
-        ioerror_to_click_exception(e)
-    w,h = image.size
-
-    image_rgb = np.array(image)
+    image_fname = "{0}{1}".format(image_id, EXTENSION)
+    image_rgb = imageio.imread(image_fname)
+    w,h,_ = image_rgb.shape
     color_spaces = all_color_spaces(image_rgb)
     fig,ax = plot_color_spaces(color_spaces)
     fig.savefig("{0}_colorspaces.png".format(image_id))

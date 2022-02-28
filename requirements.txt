@@ -2,10 +2,10 @@ argh==0.26.1
 click==5.1
 colorama==0.3.3
 decorator==4.0.4
+imageio==2.6.1
 matplotlib>=1.0.0
 numpy>=1.6.0
 pathtools==0.1.2
-Pillow==9.0.0
 pyparsing==2.0.5
 python-dateutil==2.4.2
 pytz==2015.7
